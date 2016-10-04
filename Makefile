@@ -21,7 +21,6 @@ compile: clean
   }; \
 	function generatePdf () { \
 	  pdflatex $(MAIN_FILE); \
-	  biber $(MAIN_FILE); \
 	  glossary; \
   }; \
 	if [[ -a "res/$(LIST_NAME)" ]]; then echo "Removing res/$(LIST_NAME)"; \
