@@ -3,7 +3,7 @@ language:
 
 dist: trusty
 
-sudo: false
+sudo: true
 
 addons:
   apt:
@@ -22,7 +22,7 @@ addons:
 script:
 - make compile
 after_failure:
-- cat Tesi.log
+- cat main.log
 
 before_deploy:
 - git fetch --tags
