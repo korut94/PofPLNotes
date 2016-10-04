@@ -1,4 +1,4 @@
-# PofPLNotes
+# PofPLNotes [![Build Status](https://travis-ci.org/korut94/PofPLNotes.svg?branch=master)](https://travis-ci.org/korut94/PofPLNotes)
 LaTeX notes about Principle of Programming Languages course
 
 # License
