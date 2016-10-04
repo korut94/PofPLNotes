@@ -1,0 +1,34 @@
+language:
+  - generic
+
+dist: trusty
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - texlive-latex-extra
+    - texlive-luatex
+    - cm-super
+    - texlive-bibtex-extra
+    - latexmk
+    - tex4ht
+    - texlive-fonts-recommended
+    - texlive-lang-italian
+
+script:
+- latexmk -jobname=PofPL -pdflatex='pdflatex -interaction=nonstopmode' -pdf
+
+before_deploy:
+- git fetch --tags
+
+deploy:
+  provider: releases
+  api_key:
+    secure: DDHlqgeeG7udQI54Lhll6G8qNqrlZtK06Iu9r/24KGRHKHm7HpzQbvnUnjo3IwR9NtU6Xdv64kbsvnu3W04Rdcnk2Ci8JDQZsJ6y7zkVLJ7790OinKIItf2JpCtn1APmIQnmjNYAohXVmMO3LD5gxZlHLauDedHyewoHb03+h+ejpvSGzA20eTKUvRnF5jR2NsOOh0QDiJyh8HehNcteQpyjh+0ZSWxrfISFMiRZCEOM4lDDSPCuklepeO2NNJRxVI0zijwL1ALo4H0foa5oVyXZdWG4CNfOYTne7bXcf6HT6/KjI5wrnXNH8FYZvbsvRPMNVPJj36jAiI53Ou9ExJ/21SIwrWGok8paac9Zn39PHcBSUGd1W6HfOMalifoo1e/6ZcCwwcBVkAck5VEnJzs6U0Uyx8AMDFh6J/IY3i5k+gyL91A7SGncSx2lHCMWujbLg4HohdaJCIv+6ZxsH7fEKs0VDDKWpZ2YrR/46jSuQfWGeA1n0ySF53BpLbloNmf1gltiIn2QELMQKOrLopijOt3h4Khz0rAk5qz5OqlC3vL/i6moIVc1yiFRNfRibugWaEVLhCZwlihGEiFGpvGb395pDrmPjvz7bNRNm+IXfRSw5inlgz7HA51r7ZeUn/iiyMVbXYZKv1IRUYieerFH2+FIbnUdcowI6xxvz2s=
+  file: PofPL.pdf
+  skip_cleanup: true
+  on:
+    repo: korut94/PofPLNotes
+    tags: true
