@@ -18,7 +18,9 @@ addons:
     - texlive-lang-italian
 
 script:
-- latexmk -jobname=PofPL -pdflatex='pdflatex -interaction=nonstopmode' -pdf
+- make compile
+after_failure:
+- cat Tesi.log
 
 before_deploy:
 - git fetch --tags
