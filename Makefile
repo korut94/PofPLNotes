@@ -3,7 +3,7 @@
 
 OUTPUT_NAME= PofPL
 LIST_NAME= listOfSections.tex
-PATH_OF_CONTENTS= res/sections
+PATH_OF_CONTENTS= res/lessons
 COMPILER_OPTIONS= pdflatex -interaction=nonstopmode
 MAIN_FILE= main
 
