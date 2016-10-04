@@ -2,8 +2,8 @@
 #License: GPLv3
 
 OUTPUT_NAME= PofPL
-LIST_NAME= listOfSections.tex
-PATH_OF_CONTENTS= res/lessons
+LIST_NAME= lessons.tex
+PATH_OF_CONTENTS= res/fLessons
 COMPILER_OPTIONS= pdflatex -interaction=nonstopmode
 MAIN_FILE= main
 
@@ -40,4 +40,4 @@ compile: clean
 
 clean:
 	git clean -Xfd
-if [[ -a "$(OUTPUT_NAME)" ]]; then rm -rv $(OUTPUT_NAME)/; fi;
+	if [[ -a "$(OUTPUT_NAME)" ]]; then rm -rv $(OUTPUT_NAME)/; fi;
