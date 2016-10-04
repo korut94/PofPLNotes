@@ -13,15 +13,8 @@ all: compile
 
 compile: clean
 	set -e; \
-	function glossary () { \
-	  makeindex -s $(MAIN_FILE).ist -t $(MAIN_FILE).glg -o $(MAIN_FILE).gls \
-	$(MAIN_FILE).glo; \
-	  makeindex -s $(MAIN_FILE).ist -t $(MAIN_FILE).alg -o $(MAIN_FILE).acr \
-	$(MAIN_FILE).acn; \
-  }; \
 	function generatePdf () { \
 	  pdflatex $(MAIN_FILE); \
-	  glossary; \
   }; \
 	if [[ -a "res/$(LIST_NAME)" ]]; then echo "Removing res/$(LIST_NAME)"; \
 		rm res/$(LIST_NAME); fi; \
