@@ -26,3 +26,28 @@ ed l'applicazione di tecniche matematiche. L'uso del \textbf{giusto modello
 matematico} garantirà l'uso del \textbf{corretto algoritmo}. Inoltre, bisogna
 bilanciare la \textit{generalità} e \textit{potenza} contro l'
 \textit{efficienza} e \textit{semplicità}.
+
+La figura sottostante mostra le serie di passi compiuti dal compilatore per
+convertire il codice sorgente nel codice \textit{target}:
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.4]{res/image/compiler_phases}
+\caption{Passi del compilatore}
+\label{fig:compiler_phases}
+\end{center}
+\end{figure}
+
+I compilatori posso compiere \textbf{una} o \textbf{più volte} un insieme di
+fasi di compilazione\footnote{Ma tutte o solo alcune?}. In base al numero delle
+volte si definiscono:
+
+\begin{definition}[Compilatore a passo singolo]
+I compilatore a \textbf{passo singolo} eseguono una sola volta un insieme di
+fasi di compilazione.
+\end{definition}
+
+\begin{definition}[Compilatore multi passo]
+I compilatori \textbf{multi passo} eseguono più volte un insieme di fasi di
+compilazione.
+\end{definition}
