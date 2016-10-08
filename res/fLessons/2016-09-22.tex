@@ -1,2 +1,289 @@
-\section{First chapter}
-This section is a test to try
+\section{Lesson 2016-09-22}
+\subsection{Programming languages}
+A \textbf{programming languages (PL)} is defined by:
+\[syntax + semantics + pragmatics\]
+
+\paragraph{syntax}
+concerned with the \textbf{form of programs} through the constructs to make a
+well-formed program.
+
+\paragraph{semantics}
+concerned with the \textbf{meaning of programs}. In other word, it's the
+well-formed program's behavior when executed on a computer.
+
+\paragraph{pragmatics}
+concerned with the \textbf{way to use the programs} in practice. Pragmatics
+include the \textit{paradigm(s)} supported by PL.
+
+\subsection{Paradigms}
+A paradigm is a \textbf{style of programming}. It is characterized by a set of
+key concepts:
+
+\begin{itemize}
+\item \textbf{Imperative} - variables, commands, procedures
+\item \textbf{Object-oriented} - objects, methods, classes
+\item \textbf{Concurrent} - processes, communication
+\item \textbf{Functional} - values, expressions, functions
+\item \textbf{Logic} - assertions, relations
+\end{itemize}
+
+\subsection{Implementation of a Programming Language}
+We call \(L\) the programming languages to make. L must be executable in
+\textbf{Abstract Machine} \(M_L\) having L as \textbf{Machine Language} (or
+\(L_M\)) implemented over a host machine \(M_O\) via \textbf{compilation},
+\textbf{interpretation} or both.
+
+\subsubsection{Abstract Machine}
+Given the programming language \(L\), we can say that:
+\begin{definition}
+An \textbf{abstract machine} for \(L\) is a collection of data structures and
+algorithms which can perform the storage and execution of programs written in
+\(L\).
+\end{definition}
+
+This abstract machine \(M_L\) can be implemented in \textbf{hardware} or
+\textbf{firmware}, over a machine \(M_O\) already implemented, through the
+data structures and the algorithms implemented in the machine language of the
+host.
+
+There are two cases:
+\begin{itemize}
+\item interpreter of \(M_L =\) interpreter of \(M_O \Rightarrow\)
+\textbf{extension} \textit{(of \(M_O\))}
+\item interpreter of \(M_L \neq\) interpreter of \(M_O \Rightarrow\)
+\textbf{interpreted} \textit{(over \(M_O\))}
+\end{itemize}
+
+other components of the machines may coincide or differ.
+
+\subsubsection{Machine Language}
+Given the abstract machine \(M\) we say that:
+\begin{definition}
+An \textbf{machine language} \(L_M\) of \(M\) includes all programs which can be
+executed by the interpreter of \(M\).
+\end{definition}
+
+where the programs are particular data on which the interpreter can act.
+
+Every abstract machine has a \textbf{unique} machine language, instead a machine
+language can have a \textbf{several} abstract machines.
+
+\subsection{Implementing a Programming Language}
+Say \(L\) the programming language to build, so we call \(M_L\) the abstract
+machine for \(L\) and \(M_O\) the host machine. To make \(L\) executable,
+\(M_L\) should be run in \(M_O\) and to do this there are three way:
+\textbf{pure interpretation}, \textbf{pure compilation} or \textbf{mixing}.
+
+\subsubsection{Pure Interpretation}
+The interpretation defines the function:
+$$I^{L_O}_L : (P^L \times D) \to D \mid I^{L_O}_L(P^L, input) =
+P^L(input)$$
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.7]{res/image/interpreter}
+\caption{Interpreter schema}
+\label{fig:interpreter_schema}
+\end{center}
+\end{figure}
+
+where $P^L$ is the program written in $L$ and $D$ is the set of
+\textit{input/output}. The image above is an abstract on how to work the
+interpreter.
+
+\subsubsection{Pure [cross] Compilation}
+The compiler from $L$ to $L_O$ defines the function:
+$$C_{L,L_O}: P^L \to P^{L_O} \mid C_{L,L_O}(P^L) = Pc^{L_O} \Rightarrow
+P^L(input) = Pc^{L_O}(input), \quad \forall input \in D$$
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=0.6]{res/image/compiler}
+\caption{Compiler schema}
+\label{fig:compiler_schema}
+\end{center}
+\end{figure}
+
+\subsection{Compilers versus Interpreters}
+Interpretation facilitates interactive debugging and testing, ex:
+\begin{itemize}
+\item Variable can be inspected and modified by a user
+\item Procedures can be invoked from the command line
+\end{itemize}
+
+The compiling is \textbf{more efficiently} than the interpreting:
+
+\paragraph{Decision at compile time}
+The compiler fix decision to \textbf{avoid} to generate code that makes this
+decision at run time.
+
+\begin{itemize}
+\item \textbf{Type checking}
+\item Static allocation
+\item Static linking
+\end{itemize}
+
+\paragraph{Leads to better performance}
+It's possible doing aggressive code optimization to exploit hardware features
+and variables allocating without variable lookup at run time.
+
+\subsection{Compilation + Interpretation}
+All implementations of programming languages use both. At least:
+\begin{itemize}
+\item Compilation (= translation) from \textbf{external} to \textbf{internal}
+representation\footnote{Cosa vuole dire?}
+\item Interpretation for I/O operations\footnote{Intenda tipo i comandi da
+terminale?}
+\end{itemize}
+
+We introduce an additional \textit{Intermediate Abstract Machine} $M_I$ with the
+language $L_I$, where:
+\begin{enumerate}
+\item $L$ is \textbf{compiled} to a program in $L_I$
+\item $L_I$ is \textbf{executed} by an interpreter for $M_I$
+\end{enumerate}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/mixing}
+\caption{
+Mixing schema - Nella slide \url{
+https://www.di.unipi.it/~andrea/Didattica/PLP-16/SLIDES/PLP-2016-02.pdf
+} n. 19 l'immagine non \`e chiara
+}
+\label{fig:mixing_schema}
+\end{center}
+\end{figure}
+
+Several language implementations adopt a compilation + interpretation schema,
+where the Intermediate Abstract Machine is called \textbf{Virtual Machine}
+(ex. Java - Java Virtual Machine).
+
+\subsection{Bootstrapping}
+First, it's necessary introduce the concept of compiler as \textbf{graphic
+element} and of \textbf{compilers composition}.
+
+\subsubsection{Composing Compilers}
+Three languages involved in writing a compiler:
+\begin{itemize}
+\item Source Language $S$
+\item Target Language $T$
+\item Implementation Language $I$
+\end{itemize}
+
+The image below show the relationship between the three programs, also called
+\textbf{T-Diagram}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=0.6]{res/image/t_diagram}
+\caption{T-Diagram representation}
+\label{t-diagram_representation}
+\end{center}
+\end{figure}
+
+This involve that we have two cases:
+\begin{enumerate}
+\item if $I = T$ we have a \textbf{Host Compiler}
+\item if $S$, $T$ and $I$ are all different we have a \textbf{Cross-Compiler}
+\end{enumerate}
+
+Now compiling a compiler\footnote{Compilando un compilatore??? Non riesco a
+capire come si otterrebbe il nuovo linguaggio...} we get a new one: the result
+is describe by \textbf{composing} T-diagrams. The most general shape of the
+basic transformation is the following:
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/composition}
+\caption{T-Diagrams composition}
+\label{t-diagrams_composition}
+\end{center}
+\end{figure}
+
+Obviously we assume that the programs written $M$ are able to run.
+
+Now introduce the concept of \textbf{Bootstrapping}:
+
+\begin{definition}
+Bootstrapping are techniques which use \textbf{partial/inefficient} compiler
+versions to generate a \textbf{complete/better} ones.
+\end{definition}
+
+Often this technique is used to compile a translator programmed in its own
+language, there are several reasons to do this\footnote{Da vedere nel libro di
+testo o chiedere al prof.}, but also it's possible use it also to make a
+compiler \textbf{portable} or \textbf{optimize} it.
+
+\subsubsection{Bootstrapping to port a compiler}
+A compiler is portable if it satisfied two criteria:
+\begin{itemize}
+\item \textbf{retargetability}
+\item \textbf{rehostability}
+\end{itemize}
+
+\begin{definition}
+A retargetable compiler is one that can be modified easily to generate code for
+a new target language.
+\end{definition}
+
+\begin{definition}
+A rehostable compiler is one that can be moved easily to run on a new machine
+\end{definition}
+
+A portable compiler is less efficient than a host compiler because we cannot
+make any specific assumption about the target machine.
+
+In the context that we have a host compiler/interpreter of $L$ for $M$ and we
+wrote a compiler of $L$ for $N$ in language $L$ itself, we can use the following
+steps to perform the port:
+\begin{enumerate}
+\item \textbf{From $L$ to $M$}: translate the compiler of $L$ in a compiler of
+$M$ so the compiler is implemented with an other language.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/from_L_to_M}
+\caption{Translate compiler from L to M by composition}
+\label{from_L_to_M}
+\end{center}
+\end{figure}
+
+\item \textbf{From $M$ to $N$}: finally we can apply the composition result to
+the original compiler so to achieve at the goal\footnote{Ma perchè sta roba
+dovrobbe rendere il codice portabile?}.
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/from_M_to_N}
+\caption{Translate compiler from M to N by composition}
+\label{from_M_to_N}
+\end{center}
+\end{figure}
+\end{enumerate}
+
+\subsubsection{Bootstrapping to optimize a compiler}
+The idea is start with a simple compiler (generating inefficient code) and use
+the bootstrapping to improve its performance. Any version will be more
+sophisticated than ones before. Take the example of wanting improve a compiler
+from ADA to $M*$ written in ADA. We have a host compiler of ADA to $M$, so we
+can compose the us compiler with the host compiler to get a new compiler of
+$ADA$ to $M*$ written in $M$ (fig. \ref{fig:from_ADA_to_M}).
+Now compiling another times the us compiler with what obtained from the
+composition we will get the optimized compiler (fig. \ref{fig:from_ADA_to_Ms}).
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{\textwidth}
+    \includegraphics[width=\textwidth]{res/image/from_ADA_to_M}
+    \caption{From ADA to M}
+    \label{fig:from_ADA_to_M}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[b]{\textwidth}
+    \includegraphics[width=\textwidth]{res/image/from_ADA_to_Ms}
+    \caption{From ADA to M*}
+    \label{fig:from_ADA_to_Ms}
+  \end{subfigure}
+  \caption{Bootstrapping to optimize a compiler}
+  \label{fig:bootstrapping_optimize}
+\end{figure}
