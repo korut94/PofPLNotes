@@ -1,4 +1,22 @@
 \section{Lezione 2016-09-26}
+\subsection{TODO}
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
+Capire meglio le varie attività svolte dal Front-End e Back-End &
+\ref{sec:front-end} \\ \hline
+Sezione Front-End non chiara, da integrare con la lettura del capito 2 [ALSU] &
+\ref{sec:front-end} \\ \hline
+\end{tabular}
+\end{center}
+\caption{Tabella miglioramenti}
+\label{tab:tab_todo_2}
+\end{table}
+
+\subsection{Progettazione del compilatore}
+\label{sec:progettazione_compilatore}
 Definizione di \textbf{compilatore}:
 
 \begin{definition}
@@ -38,6 +56,8 @@ convertire il codice sorgente nel codice \textit{target}:
 \end{center}
 \end{figure}
 
+\subsection{Tipi di compilatori}
+\label{sec:tipi_compilatori}
 I compilatori posso compiere \textbf{una} o \textbf{più volte} un insieme di
 fasi di compilazione\footnote{Ma tutte o solo alcune?}. In base al numero delle
 volte si definiscono:
@@ -53,10 +73,50 @@ compilazione.
 \end{definition}
 
 Questo comportano una serie di contrapposizioni tra i due generi:
-
+\begin{table}[H]
 \begin{center}
-\begin{table}{|l|l|}
-  \hline
-
-\end{table}
+\begin{tabular}{p{3cm}|p{5cm}|p{5cm}|}
+\cline{2-3}
+& \multicolumn{2}{|c|}{Type compiler} \\ \cline{2-3}
+& \multicolumn{1}{c|}{\textbf{Single pass}} &
+\multicolumn{1}{c|}{\textbf{Multi pass}} \\ \hline
+\multicolumn{1}{|c|}{\textbf{Efficiency}} &
+More efficient & Usually slower \\ \hline
+\multicolumn{1}{|c|}{\textbf{Memory}} & Use less memory &
+Needs more memory \\ \hline
+\multicolumn{1}{|c|}{\multirow{2}{*}{\textbf{Variable}}} &
+Requires everthing to be defined before being used &
+Declaration may be follow their use \\ \hline
+\multicolumn{1}{|c|}{\multirow{2}{*}{\textbf{Feature}}} &
+Influenced the design of early programming languages &
+Allows better optmization of target code \\ \hline
+\end{tabular}
 \end{center}
+\caption{
+Tabella delle differenze tra compilatori \textit{single pass} e
+\textit{multi pass}
+}
+\label{tab:difference_single_multi_pass_compilers}
+\end{table}
+
+\subsection{Il Front-End}
+\label{sec:front-end}
+La prima parte del compilatore va a definire la sintassi del linguaggio di
+programmazione da implementare attraverso una \textit{Context-Free Grammars}.
+Dato il programma in input questa prima parte andrà ad eseguire il parsing sia
+\textbf{semantico} che \textbf{sintattico} attraverso l'analisi di prodotti
+intermedi.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.5]{res/image/front-end_structure}
+  \caption{Struttura Front-End}
+  \label{fig:front-end_structure}
+\end{figure}
+
+\subsection{Definizione sintassi}
+\label{sec:definizione_sintassi}
+\subsubsection{Grammatica}
+\label{sec:grammatica}
+\begin{definition}
+Una \textbf{grammatica}
+\end{definition}
