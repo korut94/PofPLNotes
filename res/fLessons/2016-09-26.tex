@@ -2,13 +2,21 @@
 \subsection{TODO}
 \begin{table}[ht]
 \begin{center}
-\begin{tabular}{|l|c|}
+\begin{tabular}{|p{\textwidth}|c|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
 Capire meglio le varie attività svolte dal Front-End e Back-End &
 \ref{sec:front-end} \\ \hline
 Sezione Front-End non chiara, da integrare con la lettura del capito 2 [ALSU] &
 \ref{sec:front-end} \\ \hline
+Chiedere chiarimento ed aggiungere esempio linguaggio slide n.17 &
+\ref{sec:gerarchia_chomsky} \\ \hline
+Studiare le proprietà degli operatori nel libro [ALSU] cap.2 perchè non è troppo
+chiaro e si va solo ad intuizione &
+\ref{sec:proprieta_operatori} \\ \hline
+L'esempio non è chiaro e non si capisce cosa intenda con ``Legati più
+saldamente'' &
+\ref{sec:proprieta_operatori} \\ \hline
 \end{tabular}
 \end{center}
 \caption{Tabella miglioramenti}
@@ -19,7 +27,7 @@ Sezione Front-End non chiara, da integrare con la lettura del capito 2 [ALSU] &
 \label{sec:progettazione_compilatore}
 Definizione di \textbf{compilatore}:
 
-\begin{definition}
+\begin{definition}[\textbf{Compiler}]
 I compilatori sono \textbf{processori di linguaggi}, traslano i programmi
 scritti in un linguaggio in programma equivalente in un altro linguaggio.
 \end{definition}
@@ -62,12 +70,12 @@ I compilatori posso compiere \textbf{una} o \textbf{più volte} un insieme di
 fasi di compilazione\footnote{Ma tutte o solo alcune?}. In base al numero delle
 volte si definiscono:
 
-\begin{definition}[Compilatore a passo singolo]
-I compilatore a \textbf{passo singolo} eseguono una sola volta un insieme di
+\begin{definition}[\textbf{Single pass compilers}]
+I compilatori a \textbf{passo singolo} eseguono una sola volta un insieme di
 fasi di compilazione.
 \end{definition}
 
-\begin{definition}[Compilatore multi passo]
+\begin{definition}[\textbf{Multi pass compilers}]
 I compilatori \textbf{multi passo} eseguono più volte un insieme di fasi di
 compilazione.
 \end{definition}
@@ -117,6 +125,174 @@ intermedi.
 \label{sec:definizione_sintassi}
 \subsubsection{Grammatica}
 \label{sec:grammatica}
-\begin{definition}
-Una \textbf{grammatica}
+\begin{definition}[\textbf{Grammar}]
+Una \textbf{grammatica} è una 4-tupla $G = (N,T,P,S)$ dove:
+\begin{itemize}
+\item $T$ è un insieme finito di \textit{tokens} (simboli terminali)
+\item $N$ è un insieme finito di \textbf{non} terminali
+\item $P$ è un insieme finito di \textbf{produzioni} della forma
+$$\alpha \longrightarrow \beta$$ dove $\alpha \in (N \cup T)^*N(N \cup T)^*$ e
+$\beta \in (N \cup T)^*$
+\item $S \in N$ è il simbolo iniziale designato
+\end{itemize}
+\label{def:grammatica}
 \end{definition}
+
+Con la scrittura $A^*$ si intente una \textbf{infinita} sequenza di elementi in
+$A$. Se $A=\{a,b\} \Rightarrow A^*=\{\epsilon,a,b,aa,ab,ba,bb,aaa,...\}$. Per i
+\textbf{non} terminali la sintassi $AB=\{ab \mid a \in A,b \in B\}$.
+
+\subsubsection{Convenzioni d'uso notazioni}
+\label{sec:convenzioni_notazioni}
+\paragraph{Terminali}
+$a,b,c,... \in T$, es. specifici terminali: $0,1,id,+$.
+\paragraph{Non terminali}
+$A,B,C,... \in N$, es. specifici non terminali: $expr, term, stmt$.
+\paragraph{Simboli grammaticali}
+$X,Y,Z \in (N{\cup}T)$.
+\paragraph{Stringhe di terminali}
+$u,v,w,x,y,z \in T^*$.
+\paragraph{Stringhe simboli grammaticali}
+$\alpha,\beta,\gamma \in (N{\cup}T)^*$.
+
+\subsubsection{Derivazioni}
+\label{sec:derivazioni}
+\begin{definition}[\textbf{One-step Derivation}]
+Un derivazione passo singolo è definita da
+$$\gamma\alpha\delta \Rightarrow \gamma\beta\delta$$
+dove $\alpha\to\beta$ è una produzione della grammatica.
+\end{definition}
+
+In aggiunta si definisce:
+\begin{itemize}
+\item $\Rightarrow \text{leftmost} \Rightarrow_{lm}$ se $\gamma$ \textbf{non}
+contiene un \textit{non terminale}
+\item $\Rightarrow \text{rightmost} \Rightarrow_{rm}$ se $\delta$ \textbf{non}
+contiene un \textit{non terminale}.
+\item Chiusura transitiva $\Rightarrow^*$ (zero o più passi)
+\item Chiusura positiva $\Rightarrow^+$ (uno o più passi)
+\end{itemize}
+
+\begin{definition}[\textbf{Sentential form}]
+$\alpha$ di definisce una forma sentenziale se $S \Rightarrow^* \alpha$.
+\end{definition}
+
+\begin{definition}[\textbf{Language generated}]
+Sia $G$ una grammatica, allora si definisce il linguaggio generato da $G$ come
+$$L(G)=\{w \in T^* \mid S \Rightarrow^+ w\}$$
+\end{definition}
+
+\begin{proof}[Esempio derivazione 1]
+Data la grammatica $G=(\{E\},\{+,*,(,),-,id\},P,E)$ con la produzione
+\begin{align*}
+P = \quad
+& E \to E \textbf{+} E \\
+& E \to E \textbf{*} E \\
+& E \to \textbf{(}E\textbf{)} \\
+& E \to \textbf{-} E \\
+& E \to \textbf{id}
+\end{align*}
+esempi di derivazione possono essere:
+\begin{align}
+& E \Rightarrow \textbf{-} E \Rightarrow \textbf{-id} \\
+& E \Rightarrow_{rm} E \textbf{+} E \Rightarrow_{rm} E \textbf{+id}
+\Rightarrow_{rm} \textbf{id+id} \\
+& E \Rightarrow^* E \\
+& E \Rightarrow^* \textbf{id+id} \\
+& E \Rightarrow^+ \textbf{id*id+id}
+\end{align}
+\end{proof}
+
+\begin{proof}[Esempio derivazione 2]
+Prendiamo un'altra grammatica
+$$G=(\{list,digit\},\{+,-,0,1,2,3,4,5,6,7,8,9\},P,list)$$ dove la produzione $P$
+è
+\begin{align*}
+P =  \quad
+& list \to list \textbf{+} list \\
+& list \to list \textbf{-} digit \\
+& list \to digit \\
+& digit \to \textbf{0}|\textbf{1}|\textbf{2}|\textbf{3}|\textbf{4}|\textbf{5}|
+\textbf{6}|\textbf{7}|\textbf{8}|\textbf{9}
+\end{align*}
+una derivazione \textit{leftmost} è come segue:
+\begin{align*}
+& \underline{list} \\
+& \Rightarrow_{lm} \underline{list} \textbf{+} digit \\
+& \Rightarrow_{lm} \underline{list} \textbf{-} digit \textbf{+} digit \\
+& \Rightarrow_{lm} \underline{digit} \textbf{-} digit \textbf{+} digit \\
+& \Rightarrow_{lm} 9 \textbf{-} \underline{digit} \textbf{+} digit \\
+& \Rightarrow_{lm} 9 \textbf{-} 5 \textbf{+} \underline{digit} \\
+& \Rightarrow_{lm} 9 \textbf{-} 5 \textbf{+} 2
+\end{align*}
+\end{proof}
+
+\subsubsection{Classificazione dei linguaggi}
+\label{sec:classificazione_linguaggi}
+A seconda delle sue produzioni, una grammatica $G$ è detta:
+\paragraph{Regolare (\textbf{Regular})}
+se è \textit{right linear} dove ogni produzione è della forma
+$$A \to wB \quad \text{o} \quad A \to w$$
+o \textit{left linear} dove ogni produzione è della forma
+$$A \to Bw \quad \text{o} \quad A \to w$$
+dove $w \in T^*$.
+\paragraph{Libere dal contesto (\textbf{Context free})}
+se ogni produzione è della forma $$A \to \alpha$$ dove $A \in N$ e $\alpha \in
+(N \cup T)^*$.
+\paragraph{Sensibile al constesto (\textbf{Context sensitive})}
+se ogni produzione è della forma $$\alpha A \beta \to \alpha \gamma \beta$$
+dove $A \in N, \alpha,\gamma,\beta \in (N \cup T)^*, |\gamma| > 0$.
+\paragraph{Illimitato (\textbf{Unrestricted})}
+
+\subsubsection{Gerarchia di Chomsky}
+\label{sec:gerarchia_chomsky}
+\textit{Chomsky} definisce la relazione d'inclusione fra i vari linguaggi:
+$$\mathcal{L}(\text{regular}) \subset
+\mathcal{L}(\text{context free}) \subset
+\mathcal{L}(\text{context sensitive}) \subset
+\mathcal{L}(\text{unrestricted})$$
+dove $\mathcal{L}(T) = \{L(G) \mid G$ è il tipo di $T\}$, ovvero l'insieme di
+\textbf{tutti} i linguaggi generati dalla grammatica $G$ del tipo $T$.
+
+\subsubsection{Albero sintattico}
+\label{sec:albero_sintattico}
+La derivazione viene mostrata come un \textbf{albero}\footnote{si veda
+\url{https://www.di.unipi.it/~andrea/Didattica/PLP-16/SLIDES/PLP-2016-03.pdf}
+slide n.19 per esempio}(\textit{Parse Tree}) con le seguenti caratteristiche:
+\begin{enumerate}
+\item La \textit{root} dell'albero è etichettata da un \textit{terminale} o
+da $\epsilon$
+\item Ogni nodo interno è etichettato con un \textit{non-terminale}
+\item Se $A \to X_1 X_2 ... X_n$ è una produzione, allora il nodo ha
+immediatamente i figli $X_1, X_2, ..., X_n$ dove $X_i$ è un
+\textit{(non-)terminale} o $\epsilon$
+\end{enumerate}
+
+\begin{definition}[Ambiguity]
+Data una grammatica $G=(N,T,P,S)$ si dice che è \textbf{ambigua} se esistono
+stringhe da essa generate diverse, o equivalenti, che hanno più di un possibile
+albero sintattico.
+\end{definition}
+
+\subsubsection{Proprietà operatori}
+\label{sec:proprieta_operatori}
+Gli operatori possono godere della proprietà \textbf{associativa}:
+
+\paragraph{Left-associative}
+Operatori \textit{left-associative} hanno produzioni \textbf{ricorsive sinistre}
+del tipo $$left \to left \textbf{+} term | term$$ ad esempio la stringa
+$\textbf{a+b+c}$ ha lo stesso significato di $\textbf{(a+b)+c}$.
+
+\paragraph{Right-associative}
+Operatori \textit{right-associative} hanno produzioni \textbf{ricorsive destre}
+del tipo $$right \to term \textbf{=} right | term$$ ad esempio la stringa
+$\textbf{a=b=c}$ ha lo stesso significato di $\textbf{a=(b=c)}$. \\
+
+Inoltre possono godere della proprietà di \textbf{precedenza}, dove operatori
+con \textbf{maggior} precedenza sono ``\textbf{legati molto più saldamente}
+\footnote{originale diceva ``bind more tightly''}'':
+\begin{align*}
+& expr \to expr\textbf{+}term|term \\
+& term \to term\textbf{*}factor|factor \\
+& factor \to number|\textbf{(}expr\textbf{)}
+\end{align*}
