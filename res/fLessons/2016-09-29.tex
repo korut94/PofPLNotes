@@ -9,7 +9,22 @@
 \begin{tabular}{|p{\textwidth}|c|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
-& \\ \hline
+Effettuare una descrizione più precisa dell'obiettivo del
+\textit{Sytax-Directed Translation} &
+\ref{sec:syntax-directed_translation}\\ \hline
+Descrivere il funzionamento del \textit{lookahead token} &
+\ref{sec:parsing_predittivo} \\ \hline
+Aggiungere un esempio del \textit{lookahead token} &
+\ref{sec:parsing_predittivo} \\ \hline
+Chiedere come si risolverebbero i conflitti nel caso di più identificatori nel
+programma & \ref{soltwo} \\ \hline
+Il parser come gestirebbe i conflitti & \ref{solthree} \\ \hline
+Cosa serve produrre codice intermedio
+& \ref{sec:generatore_codice_intermedio} \\ \hline
+Capire in cosa consiste lo schema di traslazione &
+\ref{sec:schema_traslazione} \\ \hline
+Aggiungere sezione riguardante le tabelle di traslazione, davvero poco chiare
+le slide & \ref{sec:ast} \\ \hline
 \end{tabular}
 \end{center}
 \caption{Tabella miglioramenti}
@@ -17,4 +32,437 @@
 \end{table}
 
 \subsection{Sytax-Directed Translation}
-Modulo del \textit{Front-End} del compilatore
+\label{sec:syntax-directed_translation}
+Modulo del \textit{Front-End} del compilatore che attraverso una grammatica
+libera dal contesto permette di specificare la \textbf{struttura sintattica} del
+linguaggio. Inoltre ha il compito di:
+\begin{enumerate}
+\item associare ai terminali e non della grammatica un \textbf{insieme di
+attributi}
+\item associare ad ogni produzione un \textbf{insieme di regole semantiche} per
+calcolare i valori degli attributi
+\end{enumerate}
+
+Attraverso l'attraverso dell'albero sintattico vengono applicate le regole
+semantiche: una volta finito l'attraversamento, i valori degli attributi sui non
+terminali contengono la \textbf{forma traslata dell'input}. Nota: può essere
+usato per l'analisi sintattica e semantica statica.
+
+Un possibile attraversamento può essere il \textit{Depth-First} dove si vanno
+ad analizzare prima i figli e poi i genitori. L'algoritmo è il seguente:
+
+\begin{lstlisting}[frame=single]
+procedure visit(n:node);
+begin
+  for each child m of n, from left to right do
+    visit(m);
+    evalueate semantics rules at the node n
+end
+\end{lstlisting}
+
+Le regole semantiche vengono definite insieme alla produzioni per la
+composizione dell'albero sintattico. Un esempio potrebbe essere:
+\begin{align*}
+expr &\to expr_1 + term  & expr.t &:= expr_1.t // term.t // ``\textbf{+}''  \\
+expr &\to expr_1 - term  & expr.t &:= expr_1.t // term.t // ``\textbf{-}''  \\
+expr &\to term           & expr.t &:= term.t                                \\
+expr &\to \textbf{0}     & term.t &:= ``\textbf{0}''                        \\
+expr &\to \textbf{1}     & term.t &:= ``\textbf{1}''                        \\
+     &...                & ...                                              \\
+expr &\to \textbf{9}     & term.t &:= ``\textbf{9}''
+\end{align*}
+
+che data la stringa in input va a generare la forma \textbf{postfissa} dell'
+espressione. La colonna di sinistra sono le varie produzioni, mentre quella a
+destra sono le regole semantiche.
+
+Gli attributi valutati nei nodi dell'albero possono essere chiamati:
+
+\paragraph{Sintetico (\textit{Synthesized})}
+se il valore del nodo è determinato dai valori degli attributi dei nodi figli.
+\paragraph{Ereditato (\textit{Inherited})}
+se il valore del nodo è determinato dal genitore. Se sono presenti attributi di
+questo tipo l'attraversamento \textit{Depth-First} non funziona.
+
+\subsection{Schema di traslazione}
+\label{sec:schema_traslazione}
+\begin{definition}[Translation Schemes]
+Uno \textit{schema di traslazione} è una \textit{Context-free grammar}
+incorporata con le \textbf{azioni semantiche}
+\end{definition}
+
+Queste azioni semantiche vengono viste come \textbf{simboli terminali} del
+nostro albero sintattico. L'idea è che durante l'attraversamento
+\textit{Depth-First} o \textit{Left-To-Right} essi vengono eseguiti. Per l'
+esempio di prima il \textit{Transition Scheme} per la notazione postfissa
+risulta:
+
+\begin{proof}[Esempio schema di transizione]
+\begin{align*}
+& expr \to expr \textbf{+} expr & \{print(``+'')\} \\
+& expr \to expr \textbf{-} expr & \{print(``-'')\} \\
+& expr \to term                                    \\
+& term \to \textbf{0}           & \{print(``0'')\} \\
+& term \to \textbf{1}           & \{print(``1'')\} \\
+& ...                                              \\
+& term \to \textbf{9}           & \{print(``9'')\} \\
+\end{align*}
+\end{proof}
+
+\subsection{Parsing}
+\begin{definition}[Parsing]
+Il parsing è un \textbf{processo} per determinare se una stringa di
+\textit{token} possono essere generati da una grammatica.
+\end{definition}
+
+Il processo di parsing va a ``costruire'' un albero sintattico a partire:
+\begin{itemize}
+\item \textbf{dalla radice alle foglie} se è un parsing \textit{top-down}
+\item \textbf{dalle foglie alla radice} se è un parsing \textit{bottom-up}
+\end{itemize}
+
+Vi è un teorema interessante la quale dice che \textbf{per ogni} grammatica
+libera dal contesto \textbf{c'è} un parsing che prende \textbf{al più} $O(n^3)$
+per eseguire il parsing di una stringa di $n$ \textit{token}.
+
+\subsection{Parsing predittivo}
+\label{sec:parsing_predittivo}
+Il parsing predittivo fa parte della famiglia dei parser \textit{top-down}
+derivato dal \textit{Recursive Descent Parsing}, dove:
+\begin{itemize}
+\item ogni non-terminale ha una produzione che è responsabile di eseguire il
+parsing della categoria sintattica\footnote{Cos'è?} dei non-terminali di input
+\textit{token}.
+\item quando un non-terminale ha produzioni multiple, vengono prodotte una per
+una finchè una non ha successo. Se tutte falliscono, la procedura per il
+non-terminale fallisce.
+\item \textit{backtracking} è necessario e la complessità è
+\textbf{esponenziale}
+\end{itemize}
+
+Il \textit{parsing predittivo} deriva dal \textit{Recursive Descent Parsing}
+sfruttando i \textit{lookahead tokens}\footnote{Come sono fatti?} per
+inequivocabilmente determinare la produzione da provare. La complessità è
+\textbf{lineare}. L'idea è seguire un controllo guidato a partire da un token
+e si va a controllare se è il valore aspettato:
+\begin{itemize}
+\item se è quello atteso si passa al successivo finché non terminato
+\item se è errato si lancia un errore
+\end{itemize}
+
+\subsection{First}
+\begin{definition}[First]
+$FIRST(\alpha)$ è l'insieme dei terminali che appare come \textbf{primo}
+simbolo di uno o più stringhe generate da $\alpha$.
+\end{definition}
+
+Utilizzando il \textit{FIRST} si migliora l'algoritmo del parsing predittivo
+sostituendo nei branch decisionali (relativi alle produzioni) la condizione
+d'ingresso. Al posto di inserire manualmente l'insieme dei primi terminali ci
+pensa il \textit{FIRST} della produzione ad individuarli.
+
+Il problema è che quando un non terminale ($A$) ha due o più produzionie
+($\alpha$ e $\beta$) allora gli insiemi risultanti dal \textit{FIRST} di ogni
+produzione devono essere \textbf{disgiunti}
+($FIRST(\alpha) \cap FIRST(\beta) = \emptyset$) perché l'algoritmo possa
+funzionare.
+
+Attraverso l'utilizzo del \textit{Left Factoring} è possibile convertire una
+grammatica $G$ in $G'$ equivalenti dove le produzioni di $G'$ non cominciano con
+lo stesso simbolo, ovvero i \textit{FIRST} delle produzioni sono disgiunte.
+
+\begin{proof}[Esempio]
+Data la grammatica $G = (N,T,P,S)$ con $P$
+\begin{align*}
+  stmt \to
+  & \ \text{\textbf{if}} \ expr \ \text{\textbf{then}} \
+    stmt \ \text{\textbf{endif}} \\
+  & \mid \text{\textbf{if}} \ expr \ \text{\textbf{then}} \ stmt \
+    \text{\textbf{else}} \ stmt \ \text{\textbf{endif}}
+\end{align*}
+
+possiamo usare il \textit{Left Factoring} per modificare $P$ in $P'$ risolvendo
+il problema degli insiemi disgiunti:
+\begin{align*}
+& stmt \to \ \text{\textbf{if}} \ expr \ \text{\textbf{then}} \ stmt \
+             opt\_else \\
+& opt\_else \to \text{\textbf{else}} \ stmt \ \text{\textbf{endif}}
+                \mid \text{\textbf{endif}}
+\end{align*}
+\end{proof}
+
+Altro elemento di disturbo è la \textit{Left Recursion}, nel caso di un non
+terminale $A$ con una produzione del tipo
+\begin{align*}
+A \to & A \alpha \\
+      & \mid \beta \\
+      & \mid \gamma
+\end{align*}
+
+un parser predittivo andrebbe in \textit{loop}. Possiamo eliminare le
+\textbf{produzioni ricorsive a sinistra} riscrivendo la grammatica usando
+\textbf{produzioni ricorsive a destra}, come segue:
+\begin{align*}
+& A \to \beta R \mid \gamma R  \\
+& R \to \alpha R \mid \epsilon
+\end{align*}
+
+\subsection{Analizzatore lessicale}
+\label{sec:analizzatore_lessicale}
+Chiamato anche \textit{lexer} i suoi tipici task da svolgere sono:
+\begin{itemize}
+\item Rimuovere spazi bianchi e commenti
+\item Codificare costanti come \textit{token}
+\item Riconoscere le \textit{keyword}
+\item Riconoscere identificatori e immagazzinare il nome in una
+\textbf{tabella dei simboli}(\textit{symobol table}) globale
+\end{itemize}
+
+Dopo l'analisi della stringa in input, viene generata una sequenza di coppie
+$<$\textbf{token}, \textbf{tokenval}$>$ dove il primo rappresenta il
+\textit{lookahead} mentre il secondo il valore riscontrato nell'input.
+
+Tramite le variabili globali \textbf{lookahead} e \textbf{tokenval} nel codice
+si accede al token attulmente computato\footnote{Vedere slide 33 per esempio}.
+I token vengono salvati nella tabella dei simboli attraverso la struttura dati:
+
+\begin{lstlisting}[language=C]
+struct entry
+{
+  char *lexptr; /*lexema (stringa) per tokenval*/
+  int token;
+}
+
+struct entry symtable[];
+
+// Ritorna l'indice della nuova entry per la stringa
+// inserita (valore attuale) e il token a cui
+// appartiene
+insert(s, t)
+// Ritorna l'indice della entry per la stringa ``s''
+lookup(s)
+\end{lstlisting}
+
+Ogni linguaggio di programmazione è composto dagli \textbf{identificatori}
+(\textit{identifiers}) formulati dal programmatore e le
+\textbf{parole riservate}(\textit{reserved keywords}) proprie del linguaggio.
+Ogninua di esse va gestito nel \textit{lexer} per generare i token e nel
+\textit{parser} per ottenere la semantica del programma.
+
+\subsubsection{Gestione identificatori}
+In un ipotetico analizzatore lessicale scritto in \textit{C}
+\paragraph{Nel lexer}
+Codice che viene eseguito una volta trovato un identificatore. La stringa viene
+salvata nella variabile \textbf{lextbuf}
+
+\begin{lstlisting}[language=C]
+int lexan()
+{
+  // ...
+
+  // Ritorna l'indice dell'identificatore in modo da
+  // controllare se era gia' presente
+  tokenval = lookup(lexbuf);
+  // Se l'identificatore non e' mai stato
+  // inserito...
+  if (tokenval == 0) {
+    // ... si aggiunge una entry alla tabella con la
+    // coppia <ID, tokenbuf> ottenendo la posizione
+    // attuale
+    tokenval = insert(lexbuf, ID);
+  }
+
+  return symtable[tokenval].token;
+}
+\end{lstlisting}
+
+\paragraph{Nel parser}
+Esecuzione delle produzioni al fine di ottenere la semantica del programma
+\begin{lstlisting}[language=C]
+#define ID 259 /* Token restituito dal lexer */
+
+void factor()
+{
+  if (lookahead == '(') {
+    match('('); expr(); match('(');
+  } else if (lookahead == ID) {
+    // Tokenval e' una variabile globale configurata
+    // nel lexer
+    printf("%s", symtable[tokenval].lexprt);
+    match(ID);
+  } else {
+    error();
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Gestione keyword riservate}
+Per rendere effettive le \textit{keyword} riservate è sufficiente inserirle
+nella tabella globale dei simboli all'inizializzazione del compilatore, prima
+di ogni analisi sul codice in input.
+
+\paragraph{Nel lexer}
+Vanno distinti tre parti:
+\begin{itemize}
+\item I file con i token assegnati alle \textit
+\item Inserimento nella tabella dei simboli
+\item La consueta procedura d'analisi
+\end{itemize}
+
+Rispettivamente vengono creati tre file (\textit{global.h}, \textit{init.c},
+\textit{lexer.c}) dove eseguire le tre procedure. Il lexer rimane invariato
+mentre gli altri due seguono la forma:
+\begin{lstlisting}[language=C,caption=global.h]
+// Lista keyword per il linguaggio
+#define DIV 257 /* token */
+#define MOD 258 /* token */
+#define ID  259 /* token */
+\end{lstlisting}
+
+\begin{lstlisting}[language=C,caption=init.c]
+#include "global.h"
+
+// Lista inserimenti nella tabella dei simboli
+insert("div", DIV);
+insert("mod", MOD);
+\end{lstlisting}
+
+In un programma lo stesso identificatore (es. variabile) può essere utilizzato
+più volte, tipo in diversi blocchi del programma, tuttavia potrebbero assumere
+significati completamente diversi (es. cambio del tipo) modificando gli
+attributi del token associato. Con l'algoritmo attuale si andrebbe a generare
+un conflitto, tenendo per buono il primo identificatore scoperto. Per risolvere
+ciò una soluzione è usare un'\textbf{unica} tabella dei simboli
+\textbf{per ogni scope}. La gestione delle varie tabella potrebbe essere:
+\begin{enumerate}
+\item concatenarle per blocchi innestati
+\item tabella hash + stack ausiliario(?)\label{soltwo}
+\item le entry della tabella vengono create dal parser(?)\label{solthree}
+\end{enumerate}
+
+\subsection{Generatore codice intermedio}
+\label{sec:generatore_codice_intermedio}
+Ci sono due tipologie di codice intermedio che portano vari vantaggi:
+\paragraph{Alberi (Trees)}
+molto utile per \textbf{analisi semantica}("\textbf{static checking}")
+\begin{itemize}
+\item \textit{parse trees}
+\item \textit{abstract syntax trees}
+\end{itemize}
+
+\paragraph{Rappresentazioni lineari (Linear rappresentation)}
+buona per ottimizzazione del codice indipendente dalla macchina
+\begin{itemize}
+\item \textit{three-address code}
+\end{itemize}
+
+\subsubsection{Abstract Syntax Trees}
+\label{sec:ast}
+A differenza dell'albero sintattico, la quale rappresenta la
+\textbf{sintassi concreta} del programma, l'\textit{Abstract Syntax Trees} o
+\textbf{AST} è la rappresentazione ad albero della \textbf{sintassi astratta}
+del programma; ovvero:
+\begin{itemize}
+\item rimosse le parentesi
+\item eliminate le \textit{keyword}
+\item construtti rappresentati dai nodi
+\end{itemize}
+
+\subsection{Controllo statico}
+Le proprietà sintattiche (non catturate dal grammatica del linguaggio) sono
+controllate attraverso l'analisi dal \textit{parse tree} e
+\textit{abstract syntax tree}
+
+Le proprietà sintattica \textit{context-dependent} sono:
+\begin{enumerate}
+\item ogni variabile è dichiarata dopo l'uso
+\item ogni identificatore è dichiarato al più una volta per scope
+\item operandi sinistri dell'assegnazione sono \textit{L-valori}
+\item l'operatore \textit{break} deve essere racchiuso in un loop o switch
+\end{enumerate}
+
+\subsection{Analisi semantica}
+\begin{definition}
+L'\textbf{analisi semantica} è applica dal compilatore per scoprire il
+significato di un programma analizzando il suo \textbf{parse tree} o
+\textbf{abstract syntax tree}. Molto utile per prevenire
+\textbf{errori runtimes}.
+\end{definition}
+
+L'operazione d'analisi semantica può essere eseguita o a \textit{static} o
+\textit{dynamic time}. Nel secondo caso è il compilatore a produrre codice che
+va effettivamente ad eseguire l'analisi. In base a quando eseguire i controlli
+si possono eseguire vari riconoscimenti:
+\paragraph{Static semantic checks}
+\begin{itemize}
+\item Type checking, ogni operatore è applicato all'argomento del
+giusto tipo
+\item Handling coercion and overloading
+\end{itemize}
+
+\paragraph{Dynamic semantic checks}
+\begin{itemize}
+\item Indice array all'interno dei limiti
+(\textit{subscript values within bounds})
+\item Errori aritmetici, divisione per 0
+\item Puntatori non deferenziati a meno che non puntino ad oggetti validi
+\item Variabili usate ma mai inizializzate
+\item Quando un controllo fallisce viene lanciata un'eccezione
+\end{itemize}
+
+\subsection{Generazione Three Address Code}
+Il three-address code è una rappresentazione lineare da induzione strutturale
+eseguendo una funzione sui nodi dell'albero.
+\paragraph{Struttura del linguaggio}
+\begin{itemize}
+\item Sequenza di istruzioni della forma $$x = y \ op \ z$$
+\item Array gestiti con istruzioni
+\begin{align*}
+& x[y] = z \\
+& x = y[z]
+\end{align*}
+\item Sequenze di controllo gestite con istruzioni \textbf{jump}
+\begin{align*}
+& ifFalse \ x \ goto \ L \\
+& ifTrue \ x \ goto \ L \\
+& goto \ L
+\end{align*}
+\item Le istruzioni possono avere qualunque numero d'etichette
+$$L1:L2: \ x = y$$
+\end{itemize}
+
+\paragraph{Traslazione di espressioni}
+\begin{itemize}
+\item Un'operazione alla volta, con l'utilizzo dei \textbf{temporanei}
+$$
+i - j + k \to \left\{
+\begin{array}{lr}
+  t1 = & i - j \\
+  t2 = & t1 + k
+\end{array}
+\right.
+$$
+$$
+2 * a[i] \to \left\{
+\begin{array}{lr}
+  t1 = & a[i] \\
+  t2 = & 2 * t1
+\end{array}
+\right.
+$$
+\item L-valori in assegnazione non possono essere traslati in temporanei
+$$
+a[i] = 2 * a[j-k] \to \left\{
+\begin{array}{lr}
+  t3   = & j - k \\
+  t2   = & a[t3] \\
+  t1   = & 2 * t2 \\
+  a[i] = & t1
+\end{array}
+\right.
+$$
+\end{itemize}
+
+Vedi slide
+\url{https://www.di.unipi.it/~andrea/Didattica/PLP-16/SLIDES/PLP-2016-04.pdf}
+n.49 per un esempio di come vedere un generatore orientato agli oggetti.
