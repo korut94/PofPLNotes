@@ -1,0 +1,46 @@
+\section{Lezione 2016-10-03}
+\subsection{TODO}
+% Insert what you need. Any row is associated with the improvment or mistake
+% arise. In the first column you can insert what you should resolve or change,
+% instead in the second column you may put the section where to apply some
+% modification.
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|p{\textwidth}|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
+Chiedere specifiche perchè realizzare un generatore di Lexical Analyzer
+& \ref{sec:lexer_generatore} \\ \hline
+Risolvere conflitti cosa intente? & \ref{sec:lexer_generatore} \\ \hline
+\end{tabular}
+\end{center}
+\caption{Tabella miglioramenti}
+\label{tab:tab_todo}
+\end{table}
+
+\subsection{Progettazione di un generatore di lexer}
+\label{sec:lexer_generatore}
+La progettazione di lexer che dato in input un linguaggio produce i token per il
+parse richiede una serie di passaggi:
+\begin{enumerate}
+\item Dalla RE (\textit{regular expression}) si costruisce un NFA
+(non-deterministic finite automaton) che accetta lo stesso linguaggio regolare
+\item Combinare gli NFA in uno singolo
+\item E' possibile \textbf{simulare direttamente} l'NFA o una volta determinato
+l'NFA simulare il DFA (deterministic finite automaton) risultante
+\item Risolvere conflitti
+\end{enumerate}
+
+\subsection{Non-deterministic Finite Automata}
+\begin{definition}[Non-deterministic Finite Automata - NFA]
+Un NFA è una 5-tupla $(S,\Sigma,\delta,s_0,F)$ dove:
+\begin{itemize}
+\item S è un insieme finito di stati
+\item $\Sigma$ è un insieme finito di simboli, l'alfabeto
+\item $\delta$ è una mappa da $S \times (\Sigma \cup \{\epsilon\})$ ad
+un'insieme di stati
+$$\delta : S \times (\Sigma \cup \{\epsilon\}) \to 2^S$$
+\item $s_0 \in S$ è lo stato di partenza
+\item $F \subseteq S$ è l'insieme degli stati accettanti (o finali)
+\end{itemize}
+\end{definition}
