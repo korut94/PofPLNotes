@@ -1,4 +1,4 @@
-\section{Lezione \_DATA\_}
+\section{Lezione 2016-10-06}
 \subsection{TODO}
 % Insert what you need. Any row is associated with the improvment or mistake
 % arise. In the first column you can insert what you should resolve or change,
@@ -9,9 +9,221 @@
 \begin{tabular}{|p{\textwidth}|c|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
-& \\ \hline
+Nella conversione da DFA a grammatica lineare, $\epsilon$ della prima produzione
+non \`e chiaro se \`e dovuto al fatto che sia stato iniziale o accettate &
+\ref{sec:grammatica_lineare_destra} \\ \hline
+Definire meglio il termine \textit{supremum} &
+\ref{sec:theorem_fixed_point} \\ \hline
+Leggere la sezione 3.9 del \textit{Dragon Book} per vedere come ottenere un
+DFA dalla RE senza costruire l'NFA assiociato & \\ \hline
+Chidere spiegazioni sul fatto del perch\'e la grammatica non sia $LL(1)$ &
+\href{http://www.di.unipi.it/~andrea/Didattica/PLP-16/SLIDES/PLP-2016-07.pdf}{
+slide 22
+} \\ \hline
 \end{tabular}
 \end{center}
 \caption{Tabella miglioramenti}
 \label{tab:tab_todo}
 \end{table}
+
+
+\subsection{Dal DFA ad una espressione regolare}
+A volte \`e pi\`u intuitivo scrivere direttamente l'automa a stati finiti che
+accetta le stringhe di un linguaggio piuttosto di comporre l'espressione
+regolare associata. Si \`e vista la relazione che lega le RE-NFA-DFA, con l'
+aggiunta della \textit{Right-linear Grammars} \`e possibile definire la
+relazione da DFA-RE.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/relations}
+\end{center}
+\caption{Relazione rappresentazioni di un linguaggio}
+\label{img:relations}
+\end{figure}
+
+\subsection{Grammatica lineare destra}
+\label{sec:grammatica_lineare_destra}
+\begin{definition}[Right-linear grammar]
+In una grammatica lineare destra ogni produzione \`e della forma:
+$A \to wB \text{ o } A \to w \ (w \in T^*)$.
+\end{definition}
+
+Dato un DFA $D = (Q,\Sigma, \delta, q_0, F)$ i passaggi per convertirla in una
+\textit{Right-linear Grammar} sono la creazioni della forma:
+$$q \to t_1\delta(q,t_1) \mid ... \mid t_n\delta(q,t_n) \quad \forall q \in Q$$
+dove $t_i$ sono le etichette degli archi \textbf{entranti} in $q$. Nel caso
+$q \in F$ (ovvero stato finale) si aggiunge la $\epsilon$\textit{-transition}
+nella produzione\footnote{Supposizione! Da confermare}. La costruzione vale
+anche per NFA. \`E anche possibile utilizzarla per convertire una qualsiasi
+grammatica lineare destra in NFA (le produzioni dovrebbero essere trasformate
+introducendo nuovi non-terminali).
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/from_dfa_to_re}
+\end{center}
+\caption{Esempio da DFA a RE}
+\label{img:from_dfa_to_re}
+\end{figure}
+
+\subsubsection{Teorema del punto fisso}
+\label{sec:theorem_fixed_point}
+Prima di esporre il teorema \`e necessario introdurre il concetto di
+\textbf{ordine completo parziale}:
+\begin{definition}[CPO - Complete Partial Order]
+Un ordine completo parziale \`e un ordine parziale con almeno $\perp$ e tale
+che ogni catena di incrementi\footnote{$a < b < ... < z < ...$} abbiano un
+supremum.
+\end{definition}
+
+Adesso esponiamo il teorema del punto fisso di Kleene:
+\begin{definition}[Kleene fixed-point thorem]
+Ogni funzione continua $F$ su un ordine completo parziale (CPO) ha almeno un
+punto fisso, il quale \`e il supremum della catena:
+$$F(\perp) \leq F(F(\perp)) \leq ... \leq F^n(\perp) \leq ...$$
+\end{definition}
+
+\subsubsection{Una CFG come funzione sul CPO dei linguaggi}
+Un linguaggio su $\Sigma$ forma un ordine completo parziale sotto un'insieme di
+inclusioni. Una \textit{context-free grammar} definisce una funzione continua
+sui linguaggi\footnote{nelle slide si riferisce alla sequenza}
+\begin{align*}
+&A \to a | bA & F(L)=\{a\} \cup \{bw \mid w \in L\}
+\end{align*}
+Il linguaggio generato dalla grammatica \`e il minimo punto fisso della funzione
+associata
+$$
+\emptyset \subset \{a\} \subset \{a,b\} \subset \{a,ba,bba\} \subset ...
+\subset \{b^na \mid n \geq 0\}
+$$
+nel caso di grammatiche lineari destre noi possiamo descrivere il minimo punto
+fisso come un'espressione regolare
+$$Lang(A)=b^*a$$
+
+Qui sotto e' un esempio di come dalla produzione ottenuta si riesce a
+convertirla in un'espressione regolare.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.5]{res/image/example_p_re}
+  \caption{Esempio ottenimento RE dalla produzione}
+  \label{img:example_p_re}
+\end{figure}
+
+\subsection{Top-down Parsing}
+La sintassi di un programma \`e tipicamente definita da due grammatiche:
+\paragraph{Lexical Grammar}
+Definisce i \textbf{token}
+\begin{itemize}
+\item grammatica regolare; presentata come \textit{regular expression}
+\item simboli terminali sono caratteri
+\end{itemize}
+\paragraph{Syantax grammar}
+Definisce i \textbf{costrutti del linguaggio}
+\begin{itemize}
+\item grammatica libera dal contesto; presentata come \textit{Backus-Naur form}
+\item simboli terminali sono token
+\end{itemize}
+
+Nota: ci sono costrutti sintattici non liberi dal contesto
+\begin{itemize}
+\item variabili dichiarate prima dell'uso $\to \{wcw \mid w \in (a|b)^*\}$
+\item numero di parametri attuali/formali $\to \{a^nb^mc^nd^m \mid n>0,m>0\}$
+\end{itemize}
+
+\subsubsection{Towards parsing}
+Il parsing implementa la grammatica non libera dal contesto come un
+riconoscitore di stringhe:
+\begin{enumerate}
+\item controlla che la stringa in input (dei token) sia generata dalla
+grammatica della sintassi
+\item genera il possibile albero di parsing
+\item riporta gli errori sintattici accurati
+\item invoca le \textbf{azioni semantiche}
+\end{enumerate}
+
+le azioni saranno per il controllo statico della semantica (es. type
+checking di espressioni, funzioni, ecc.) e per \textit{syntax-directed
+translation} dal codice sorgente ad una rappresentazione intermedia.
+
+\paragraph{Descrizione}
+Propriet\`a del parsing top-down:
+\begin{itemize}
+\item accetta CFG ma con restrizioni
+\item usa metodi LL (Left-to-right, Leftmost derivation)\footnote{forse vogliono
+dire la stessa cosa}
+\item complessit\`a \textbf{lineare}
+\end{itemize}
+
+Il top-down parsing \`e efficiente se la grammatica soddisfa alcune condizioni:
+\textit{quando bisogna espandere i non-terminali, i successivi \textbf{k} token
+dovrebbero determinare la produzione da usare} (lookahead). In questo caso la
+grammatica \`e $LL(k)$.
+
+\begin{definition}[Left-recursive]
+Una grammatica si dice ricorsiva a sinistra se c'\`e un non-terminale $A
+\mid A \Rightarrow^+ A\eta$ per qualche stringa $\eta$.
+\end{definition}
+
+Nota che la ricorsione a sinistra pu\`o essere indiretta. Una grammatica
+ricorsiva a sinistra \textbf{non pu\`o essere} $LL(k)$, per alcuni input il
+top-down parser andrebbe in loop.
+
+\subsubsection{Eliminazione ricorsione a sinistra}
+Data la grammatica $M$ con la produzione $P$
+$$A \to A\alpha | A\beta |  \gamma | \delta$$
+per ricondurla ad un'altra grammatica equivalente $M'$ bisogna:
+\begin{enumerate}
+\item creare un'ulteriore produzione ($A_R$) dove portare tutti terminali
+preceduti dal ricorsione
+\item nella prima produzione ($A$) affiancare a \textbf{destra} ad ogni
+terminale rimasto la produzione creata
+\item nella nuova produzione ($A_R$) affiancare a \textbf{destra} la produzione
+nuova (ricorsione a destra) e inserire il terminale $\epsilon$
+\end{enumerate}
+
+\begin{align}
+A   & \to \gamma A_R | \delta A_R \\
+A_R & \to \alpha A_R | \beta A_R | \epsilon
+\end{align}
+
+Nel caso di produzioni multiple, ove un non-terminale con ricorsione sinistra
+appare pu\`o apparire in altre produzioni, \`e necessario eseguire il seguente
+algoritmo:
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.4]{res/image/elimination_Rleft}
+\end{center}
+\caption{Algoritmo eliminazione ricorsioni sinistre}
+\label{img:eliminination_Rleft}
+\end{figure}
+
+Il ciclo principale dell'algoritmo prende lista delle produzioni
+\textbf{ordinate a scelta}, inizia con le espansioni della produzione (fissata
+da $i$) nelle produzioni precedenti (scorse da $j$), e chiude con
+\textit{"eliminate the immediate left recursion"} ovvero la procedura spiegata
+sopra.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.3]{res/image/elimination_example}
+\end{center}
+\caption{Esempio procedura d'eliminazione}
+\label{img:eliminination_example}
+\end{figure}
+
+\subsubsection{Elementi del parsing predittivo}
+Primo modificare la grammatica in modo che possa essere $LL(1)$, ovvero:
+\begin{itemize}
+\item eliminazione delle ricorsioni sinistre
+\item \textit{left factor} della grammatica
+\end{itemize}
+
+successivamente si va a calcolare il \textit{FIRST} ed il \textit{FOLLOW} della
+grammatica ed eseguire un ulteriore \textbf{controllo} se la grammatica si
+$LL(1)$. Ora si potr\`a eseguire il parsing scegliendo tra:
+\begin{itemize}
+\item \textbf{Non-recursive} (table-driven parsing)
+\item \textbf{Recursive} (recursive-descent parsing)
+\end{itemize}
