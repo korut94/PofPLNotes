@@ -4,32 +4,25 @@
 OUTPUT_NAME= PofPL
 LIST_NAME= lessons.tex
 PATH_OF_CONTENTS= res/fLessons
-COMPILER_OPTIONS= pdflatex -interaction=nonstopmode
 MAIN_FILE= main
-
+CC= latexmk
+JOB_NAME=-jobname='$(OUTPUT_NAME)'
+CCFLAGS= -pdflatex='pdflatex -interaction=nonstopmode' -pdf
 SHELL := /bin/bash #Need bash not shell
 
 all: compile
 
-compile: clean
-	set -e; \
-	function generatePdf () { \
-	  pdflatex $(MAIN_FILE); \
-  }; \
+compile:
 	if [[ -a "res/$(LIST_NAME)" ]]; then echo "Removing res/$(LIST_NAME)"; \
 		rm res/$(LIST_NAME); fi; \
 	for i in $(sort $(wildcard $(PATH_OF_CONTENTS)/*.tex)); do \
 		echo "Adding $$i into $(LIST_NAME)"; \
 		echo "\input{$$i}" >> res/$(LIST_NAME); \
 	done; \
-	for j in {1..2}; do \
-	  generatePdf; \
-  done; \
-	for k in {1..2}; do \
-	  pdflatex $(MAIN_FILE); \
-  done; \
-	mv $(MAIN_FILE).pdf $(OUTPUT_NAME).pdf;
+	$(CC) -C $(JOB_NAME); \
+	$(CC) $(CCFLAGS) $(JOB_NAME); \
 
 clean:
 	git clean -Xfd
+	$(CC) -C $(JOB_NAME)
 	if [[ -a "$(OUTPUT_NAME)" ]]; then rm -rv $(OUTPUT_NAME)/; fi;
