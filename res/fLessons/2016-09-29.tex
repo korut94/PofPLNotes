@@ -153,15 +153,33 @@ e si va a controllare se è il valore aspettato:
 \subsection{First}
 \begin{definition}[First]
 $FIRST(\alpha)$ è l'insieme dei terminali che appare come \textbf{primo}
-simbolo di uno o più stringhe generate da $\alpha$.
+simbolo di uno o più stringhe generate da $\alpha$. Inoltre:
+\begin{itemize}
+\item $FIRST(a) = \{a\}$ dove $a \in T$
+\item $FIRST(\epsilon) = \{\epsilon\}$
+\item $FIRST(A) = \bigcup_{A \to \alpha}FIRST(\alpha)$ questo $\forall A \to
+\alpha \in P$
+\item $FIRST(X_1X_2...X_k) =$
+\begin{align*}
+& \mathbf{if} \ \forall j = 1,...,i-1 \mid \epsilon \in FIRST(X_j) \
+  \mathbf{then} \\
+& \quad \text{add non-}\epsilon \text{ in } FIRST(X_i) \text{ to }
+        FIRST(X_1X_2...X_k) \\
+& \mathbf{if} \ \forall j = 1,...,k \mid \epsilon \in FIRST(X_j) \
+  \mathbf{then} \\
+& \quad \text{add }\epsilon \text{ to } FIRST(X_1X_2...X_k)
+\end{align*}
+\end{itemize}
 \end{definition}
+
+
 
 Utilizzando il \textit{FIRST} si migliora l'algoritmo del parsing predittivo
 sostituendo nei branch decisionali (relativi alle produzioni) la condizione
 d'ingresso. Al posto di inserire manualmente l'insieme dei primi terminali ci
 pensa il \textit{FIRST} della produzione ad individuarli.
 
-Il problema è che quando un non terminale ($A$) ha due o più produzionie
+Il problema è che quando un non terminale ($A$) ha due o più produzioni
 ($\alpha$ e $\beta$) allora gli insiemi risultanti dal \textit{FIRST} di ogni
 produzione devono essere \textbf{disgiunti}
 ($FIRST(\alpha) \cap FIRST(\beta) = \emptyset$) perché l'algoritmo possa
