@@ -20,6 +20,14 @@ Chidere spiegazioni sul fatto del perch\'e la grammatica non sia $LL(1)$ &
 \href{http://www.di.unipi.it/~andrea/Didattica/PLP-16/SLIDES/PLP-2016-07.pdf}{
 slide 22
 } \\ \hline
+Inserire il link all'algoritmo \textit{match} degli appunti precedenti &
+\ref{par:if_terminal} \\ \hline
+Chiedere come \`e possibile determinale la produzione con cui fare il confronto
+nell'algoritmo fig.\ref{img:PPP}. Inoltre se il non-terminale ha produzioni
+multiple come si eseguirebbe il confronto. &
+\ref{par:if_non-terminal} \\ \hline
+Chiedere come nel \textit{Phrase-level Recovery} come si decide dove posizionare
+l'azione di correzzione & \ref{sec:phrase-level_recovery} \\ \hline
 \end{tabular}
 \end{center}
 \caption{Tabella miglioramenti}
@@ -313,8 +321,190 @@ Data la grammatica $G=(N,T,P,S)$ si ha una tabella $M$ con:
 \item un entry $M[A,a]$ per ogni $A \in N$ e $a \in T$
 \item la entry $M[A,a]$ contiene le produzioni da applicare ad $A$ quando \`e
 stata ridotta e $a$ \`e il suo \textit{lookahead}
-\item ogny entry \textbf{indifenita} in $M$ \`e marcata come errore
+\item ogni entry \textbf{indifenita} in $M$ \`e marcata come errore
 \end{itemize}
 
 La grammatica \`e $LL(1)$ sse $M[A,a]$ contiene al pi\`u una produzione $\forall
-A \in N$ e $a \in T$.
+A \in N$ e $a \in T$. Dai passi indicati si deriva l'algoritmo per la creazione
+della tabella $M$:
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/algorithm_fill_M}
+\end{center}
+\caption{Algoritmo riempimento tabella $M$}
+\label{img:algorithm_fill_M}
+\end{figure}
+
+L'immagine \ref{img:example_create_M} \`e un esempio di come viene creata la
+tabella $M$. Prima si produce una tabella intermedia dove si individua il
+$FIRST$ ed il $FOLLOW$ dei vari non-terminali; se un non-terminale ha produzioni
+multiple si dividono. Una volta completata si applica l'algoritmo di
+fig.\ref{img:algorithm_fill_M}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.3]{res/image/example_create_M}
+\end{center}
+\caption{Esempio creazione tabella $M$}
+\label{img:example_create_M}
+\end{figure}
+
+Se la grammatica nel quale si tenta di costruire la tabella $M$ \`e
+\textbf{ambigua} si otterrebbe che per alcune entry della tabella vengono
+inserite pi\`u produzioni. La figura sottostante ne mostra un esempio.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.3]{res/image/conflict_in_M}
+\end{center}
+\caption{Esempio conflitti $M$ per grammatica ambigua}
+\label{img:conflict_in_M}
+\end{figure}
+
+\subsubsection{Programma di parsing predittivo}
+Una volta creata la tabella il \textit{Predictive Parsing Program}
+(o \textit{Driver}) pu\`o utilizzarla per eseguire l'espansione dei
+non-terminali e di conseguenza eseguire le azioni associate (es. generare la
+rappresentazione intermedia). L'algoritmo \`e quello in fig.\ref{img:PPP}.
+
+\paragraph{Inizializzazione - \textit{l.0-2}}
+si va ad inserire nello stack il primo simbolo (\$) il quale sar\`a l'ultimo ad
+essere elaborato: il raggiungimento di quel simbolo nello stack determina la
+buona riuscita del parsing. Successivamente si mette in testa il primo
+non-terminale con cui iniziale la ricerca e si setta il \textit{lookahead} al
+primo simbolo dell'input.
+
+\paragraph{Estrazione - \textit{l.4}}
+\label{par:extraction}
+preleviamo simbolo nel top dello stack. Da qui il comportamento del programma
+dipender\`a se il simbolo \`e un terminale o un non-terminale. Se fosse un
+non-terminale si avrebbe la chiave della riga $M$ in corrispondenza del simbolo
+$A$.
+
+\paragraph{Se terminale - \textit{l.5-6}}
+\label{par:if_terminal}
+Le continue espansioni dei non-terminali nello stack hanno portato ad avere un
+terminale. Qui si procede con il \textit{match} del terminale con quello atteso
+(vedere funzione match) e se \`e positivo si consuma l'attuale \textit{lookahed}
+passando a quello successivo.
+
+\paragraph{Se non-terminale - \textit{l.7-9}}
+\label{par:if_non-terminal}
+Il \textit{lookahead} fornisce il simbolo che determina la colonna di $M$.
+Attraverso la coppia $(A,a)$ (in questo caso $A=X$) si va ad espandere il
+non-terminale. I simboli sono inseriti al contrario in modo da non perdere
+l'ordine dato dallo stack. Da qui invochi azioni o produci la
+\textit{Intermediate Rappresentation} (IR).
+
+\paragraph{Loop e fine}
+La procedura d'estrazione e controlli avviene fin tanto che non si \`e tornati
+al simbolo \$ inserito nel bottom dello stack durante l'inizializzazione. Se
+il simbolo estratto non soddisfasse le condizioni dei due branch allora si \`e
+incappati in un errore.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.45]{res/image/PPP}
+\end{center}
+\caption{Algoritmo del parsing predittivo}
+\label{img:PPP}
+\end{figure}
+
+\subsection{Gestione errori}
+Un buon compilatore dovrebbe assistere nell'identificazione e localizzazione
+degli errori.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{4cm}|}
+\hline
+\textbf{Errore} & \textbf{Identificazione} & \textbf{Esempio} \\ \hline
+\textit{Errori lessicali} &
+Facile, recupero e proseguimento possibile &
+Errore ortografico \\ \hline
+\textit{Errore sintattico} &
+Quasi sempre recuperabili &
+";" o "\}" mancante, "case" smarrito \\ \hline
+\textit{Errori semantici statici} &
+Qualche volta recuperabili &
+Tipi incompatibili, dichiarazione prima dell'uso \\ \hline
+\textit{Errori semantici dinamici} &
+Difficile o impossibile a \textit{compile-time} &
+Puntatore \textit{NULL}, divisione per zero, accesso errato array \\ \hline
+\textit{Errori logici} &
+Difficile o impossibile &
+\textit{if (b \textbf{=} true) ...} \\ \hline
+\end{tabular}
+\end{center}
+\caption{Tabella errori di compilazione}
+\label{tab:compiler_error}
+\end{table}
+
+\subsection{Error Detection Strategy}
+\subsubsection{Viable-Prefix Property}
+La \textit{Viable-Prefix Property} dei parser permette l'identificazione degli
+\textbf{errori di sintassi}.
+
+\paragraph{Grammatica}
+funziona con parser \textit{LL(1)} ed \textit{LR(1)}.
+\paragraph{Obiettivo}
+individuazione degli errori il pi\`u presto possibile senza consumare input
+distanti non necessari.
+\paragraph{Come}
+individua un errore appena un prefisso dell'input non coincide con \textbf{i
+prefissi di ogni stringa} nel linguaggio.
+
+\subsection{Error Recovery Strategies}
+\subsubsection{Panic Mode Strategy}
+chiamati \textit{synchronizing tokens} \`e trovato (es. "\}", ";").
+Scarta elementi in input finch\'e un token in un insieme di token designati
+
+La realizzazione avviene trammite l'aggiunta di un'azione \textit{synch} per
+le entry nella tabella $M$ \textbf{indefinite} basate sul $FOLLOW$. Ci\`o
+significa che nella riga di $A$ inserir\`o un'azione di sincronizzazione nelle
+entry corrispondenti ai terminali nell'insieme del $FOLLOW(A)$, se sono vuote.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.35]{res/image/example_panic_mode}
+\end{center}
+\caption{Esempio completo del \textit{Panic Mode}}
+\label{img:example_panic_mode}
+\end{figure}
+
+Nell'esempio sopra si pu\`o notare che la posizione del \textit{synch} coincide
+con la posizione dei terminali appartenente al $FOLLOW$ dei vari non-terminali.
+L'azione \textit{synch} comanda al driver di fare il pop del non-terminale $A$
+(quello in testa allo stack in attesa di essere espanso) e ignora i simboli in
+input finch\'e o trova un terminale \textit{synch} o trovi un $FIRST(A)$.
+
+\subsubsection{Phrase-level recovery}
+\label{sec:phrase-level_recovery}
+Applica una correzione \textbf{locale} sull'input per riparare l'errore.
+Si attua questo correzione inserendo un'azione (es. \textit{insert*}) in
+corrispondenza di una entry indefinita di $M$.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.35]{res/image/example_phrase_level}
+\end{center}
+\caption{Esempio completo del \textit{Phrase-level}}
+\label{img:example_phrase_level}
+\end{figure}
+
+\subsubsection{Error productions}
+Aumenta la grammatica con produzioni per erronee costruzioni.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.4]{res/image/example_error_productions}
+\end{center}
+\caption{Esempio completo dell'\textit{Error Productions}}
+\label{img:example_error_productions}
+\end{figure}
+
+
+\subsubsection{Global correction}
+Scegli una \textbf{minima} sequenza di cambiamenti per ottenere una globale
+correzione a costo minimo.
