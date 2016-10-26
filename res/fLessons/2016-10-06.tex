@@ -227,3 +227,94 @@ $LL(1)$. Ora si potr\`a eseguire il parsing scegliendo tra:
 \item \textbf{Non-recursive} (table-driven parsing)
 \item \textbf{Recursive} (recursive-descent parsing)
 \end{itemize}
+
+\subsubsection{FOLLOW}
+\begin{definition}[Follow]
+Il $FOLLOW(A)$ \`e l'insieme dei terminali che possono immediatamente seguire
+il non-terminale $A$. Inoltre:
+\begin{itemize}
+\item $FOLLOW(A) =$
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/follow}
+\label{img:follow}
+\end{center}
+\end{figure}
+\end{itemize}
+\end{definition}
+
+\subsubsection{Grammatiche LL(1)}
+\begin{definition}[LL(1) grammar]
+Una grammatica $G$ si dice $LL(1)$ se \textbf{non c'\`e} ricorsione sinistra e
+per ogni collezione di produzioni
+$$A \to \alpha_1|\alpha_2|...|\alpha_n$$
+per il non-terminale $A$ la seguenti condizioni:
+\begin{enumerate}
+\item $FIRST(\alpha_i) \cap FIRST(\alpha_j) = \emptyset \quad \forall i \neq j$
+\item $\text{if } \alpha_i \Rightarrow^* \epsilon \text{ then}$
+\begin{enumerate}
+\item $a_j \not{\Rightarrow^*} \epsilon \quad \forall i \neq j$
+\item $FIRST(\alpha_j) \cap FOLLOW(A) = \emptyset \quad \forall i \neq j$
+\end{enumerate}
+\end{enumerate}
+\end{definition}
+
+La seguente tabella mostra alcuni esempio di grammatiche non $LL(1)$:
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/no_LL1}
+\end{center}
+\caption{Esempio di grammatiche no $LL(1)$}
+\label{img:en_LL1}
+\end{figure}
+
+\subsubsection{Parsing ricorsivo discendente}
+La costruzione dell'algoritmo di \textit{Recursive-Descent Parser} \`e molto
+semplice:
+\begin{itemize}
+\item ogni \textbf{non-terminale} ha una \textbf{procedura} (ricorsiva)
+responsabile per eseguire il parsing della categoria sintattica dei terminali,
+gli input token
+\item quando un non-terminale ha produzioni multiple ogni \textbf{produzione}
+\`e implementata in un \textbf{branch} basato sull'informazione del
+\textit{lookahead}
+\end{itemize}
+
+Esempio mostra come vengono utilizzati il $FIRST$ ed il $FOLLOW$ (va usato solo
+quando si incappa in una $\epsilon$-produzione) durante la
+fase di parsing:
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.4]{res/image/example_RDP}
+\end{center}
+\caption{Dalla grammatica al codice per il parsing ricorsivo discendente}
+\label{img:example_RDP}
+\end{figure}
+
+Nota: la grammatica \textbf{deve} essere $LL(1)$.
+
+\subsubsection{Parsing non-ricorsivo predittivo}
+L'eliminazione della ricorsione avviene mediante una tabella $M$ costruita a
+partire dalla grammatica $LL(1) G=(N,T,P,S)$ tramite un programma
+\textit{driver} con uno \textit{stack}. Quest'ultimo va a rimpiazzare lo stack
+a \textit{runtime} dell'algoritmo ricorsivo, tenendo i simboli della grammatica.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{res/image/driver_stack}
+\end{center}
+\caption{Rappresentazione \textit{driver} con \textit{stack}}
+\label{img:driver_stack}
+\end{figure}
+
+\subsubsection{Costruzione della Predictive Parsing Table}
+Data la grammatica $G=(N,T,P,S)$ si ha una tabella $M$ con:
+\begin{itemize}
+\item un entry $M[A,a]$ per ogni $A \in N$ e $a \in T$
+\item la entry $M[A,a]$ contiene le produzioni da applicare ad $A$ quando \`e
+stata ridotta e $a$ \`e il suo \textit{lookahead}
+\item ogny entry \textbf{indifenita} in $M$ \`e marcata come errore
+\end{itemize}
+
+La grammatica \`e $LL(1)$ sse $M[A,a]$ contiene al pi\`u una produzione $\forall
+A \in N$ e $a \in T$.
