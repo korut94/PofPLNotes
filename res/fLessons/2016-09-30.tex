@@ -1,0 +1,334 @@
+\section{Lezione 2016-09-30}
+\subsection{TODO}
+% Insert what you need. Any row is associated with the improvment or mistake
+% arise. In the first column you can insert what you should resolve or change,
+% instead in the second column you may put the section where to apply some
+% modification.
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|p{\textwidth}|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
+Dare una definizione migliore di \textit{Lexeme} &
+\ref{sec:token_pattern_lexemi} \\ \hline
+Con il termine \textit{reload first/second half} si intende che viene caricata
+in quella porzione nuovi caratteri dall'input? &
+\ref{par:naive_implementation} \\ \hline
+Nelle operazione di ricerca token quando avviene un errore? &
+\ref{sec:token} \\ \hline
+Valutare se le proprietà dell'espressioni regolari sono meritevoli di essere
+trascritte negli appunti & ??? \\ \hline
+Comprendere meglio perchè con il diagramma di transizione si può riconoscere il
+lexame più lungo. Quali altre opzioni ci sono? &
+\ref{sec:definizioni_regolari} \\ \hline
+Capire cos'è il \textbf{RELOP} & \ref{sec:definizioni_regolari} \\ \hline
+Capire meglio quali tipologie d'errori il lexer non è in grado di individuare &
+\ref{sec:definizioni_regolari} \\ \hline
+\end{tabular}
+\end{center}
+\caption{Tabella miglioramenti}
+\label{tab:tab_todo}
+\end{table}
+
+\subsection{Il lexer è una fase separa}
+Motivazione è mantenere il \textit{Separation of Concern} in modo da
+semplificare la progettazione del compilatore. I compiti dell'analizzatore
+lessicale sarebbero potuti essere demandati al parser ma ciò conseguirebbe una
+maggiore difficoltà di gestione e appesantimento del modulo. Oltre a questo non
+sempre i parsin LL(1) o LR(1) possono essere possibile, richiedendo procedura
+aggiuntive.
+
+Con la separazione in moduli diviene possibile migliorare il lexer attraverso
+una serie di tecniche (manuali o automatiche) come per esempio il metodo dello
+\textbf{stream buffering}.
+
+Nella fase del lexer si effettuano tutte le manipolazioni sul codice di input
+per rendere le precondizioni di input del parser molto più ristrette,
+semplificando la creazione. Alcuni compiti eseguiti dal lexer:
+
+\paragraph{Miglioramento portabilità}
+Simboli non standard o codifica caratteri alternativa può essere
+\textbf{normalizzata} (es. UTF-8, trigraphs)
+\paragraph{Miglioramento sorgente}
+Rimuovere tutti i commenti, spazi bianchi, tab che appesantiscono inutilmente
+il sorgente; il lettore è una macchina. In più espande le macro definite dal
+programmatore.
+\paragraph{Avvisi}
+Correlare gli errori del parser con il codice sorgente. Esempio tener traccia
+del numero di linea.
+
+Il principale compito del lexer è eseguire la \textit{tokenization}, ovvero
+trasformare il codice sorgente in una serie di token da dare al parser per
+generare il codice intermedio. L'immagine sotto mostra il flusso logico tra i
+due moduli
+\begin{figure}[H]
+\includegraphics[scale=0.45]{res/image/lexer_parser}
+\caption{Interazione tra il lexer ed il parser}
+\label{img:lexer_parser}
+\end{figure}
+
+\subsection{Token, Pattern e Lexemi}
+\label{sec:token_pattern_lexemi}
+\begin{definition}[Token]
+Un token è una \textbf{coppia} \textbf{$<$token name, attribute$>$}. Il
+\textbf{token name} identifica la categoria dell'unità lessicale;
+\textbf{attribute} è opzionale.
+\end{definition}
+
+\begin{definition}[Lexeme]
+Un lexema è una \textbf{stringa di caratteri} che compensa il token
+(es. \textbf{abc}, \textbf{123}, $\backslash$, $>=$).
+\end{definition}
+
+\begin{definition}[Pattern]
+Un pattern è una \textbf{regola} che descrive un insieme di lexemi appartenenti
+ad un token. Per esempio:
+\begin{itemize}
+\item Lettere seguite da caratteri e numeri
+\item sequenza di numeri non vuota
+\item carattere $/$ o $>$ seguito da =
+\end{itemize}
+\end{definition}
+
+Lo scanner legge i caratteri dall'input finché non riconosce un lexema che
+soddisfa il patter per quel token.
+
+\subsection{Token}
+\label{sec:token}
+Il codice sorgente di un linguaggio è definito dalla sua
+\textit{Context Free Grammar}, usata dal parser. I token sono i
+\textbf{terminali} della grammatica.
+
+L'\textbf{attributo} del token è necessario quando il pattern comprende più
+lexemi ma dipende dal token. L'informazione tenuta può essere il singolo valore
+ma può essere più strutturata come ad esempio per gli identificatori (lexema,
+tipo, posizione della definizione, ...). Tipicamente gli attributi sono
+inseriti nella tabella dei simboli ed il token ha come attributo il
+\textbf{puntatore} alla entry della tabella.
+
+\subsubsection{Lettura caratteri in input}
+Sono tutte operazioni di I/O perciò l'efficenza diventa cruciale. Attraverso
+l'utilizzo di un buffer si riducono le operazioni di I/O (ovviamente le più
+onerose da eseguire).
+
+L'idea dello scanner è partire da un lexema (il primo all'avvio del compilatore)
+ed usare il \textit{lookahead} esaminando i caratteri successivi per
+identificare il token. Questa operazione viene chiamata \textit{forward}. Da qui
+vengono suggerite due tecniche:
+
+\paragraph{Naive implementation}
+\label{par:naive_implementation}
+I controlli sulla posizione dell'input sono eseguiti su \textbf{ogni} carattere.
+Un buffer viene riempito con i caratteri del codice sorgente e diviso in due
+parti: \textit{first half} e \textit{second half}. Dato un carattere iniziale
+definiamo \textit{forward} un puntatore ai successivi. Quello che si vuole è
+che dal carattere iniziale al \textit{forward} vi sia un token valido. La
+condizione di avanzamento prevede di determinare prima in quale parte del buffer
+ci si trova:
+\begin{enumerate}
+\item fine \textit{first half} \label{opt:1}
+\item fine \textit{second half} \label{opt:2}
+\item in nessua dei due \label{opt:3}
+\end{enumerate}
+Se si trova in \ref{opt:1} verrò caricata \textit{second half} del buffer,
+eseguendo I/O e avanzando il forward. Se si trova in \ref{opt:2} verrà
+caricata \textit{first half} e portato forward all'inizio del buffer. In tal
+maniera si va ciclicamente ad analizare il contenuto del file alla ricerca dei
+token. Se è il caso \ref{opt:3} si avanza semplicemente forward.
+
+\begin{lstlisting}[caption=Pseudo-codice implementazione naive]
+if (forward at end first half) then begin (1)
+  reload second half; // <- block I/O
+  forward := forward + 1;
+end
+
+else if (forward at end second half) then begin (2)
+  reload first half; // <- block I/O
+  jump forward to beginning of first half
+end
+
+else forward := forward + 1; (3)
+\end{lstlisting}
+
+\paragraph{Buffered I/O with Sentinels}
+Come detto sopra il metodo naive richiede il controllo della posizione corrente
+nel buffer ad ogni carattere, imponendo un'abbassamento dell'efficienza. Un modo
+semplice per il diminuire il numero di controlli è inserire un carattere
+speciale, nel caso un \textit{eof}, esattamente nella posizione che delineano la
+fine di \textit{first/second half}. In tal modo i controlli visti nel naive
+verranno eseguiti solo in presenza di un \textit{eof}. L'unica differenza lo si
+vede nel caso \ref{opt:3}, ovvero quando si ha un \textit{eof} ma non si è alla
+fine del buffer (\textit{first o second half}) significa che si ha raggiunti la
+fine del file e quindi l'analisi è terminata.
+
+\begin{lstlisting}[caption=Pseudo-codice implementazione Buffered I/O]
+forward := forward + 1;
+
+if (forward is at eof) then begin
+  if (forward at end first half) then begin
+    reload second half; // <- block I/O
+    forward := forward + 1;
+  end
+
+  else if (forward at end second half) then begin
+    reload first half; // <- block I/O
+    jump forward to beginning of first half
+  end
+
+  else
+    // eof within buffer signifying end of input
+    terminate lexical analysis
+    // 2nd eof => no more input!
+  end
+end
+\end{lstlisting}
+
+\subsection{Pattern}
+Revisione alfabeto alla base dell'espressioni regolari per comporre i
+\textit{pattern}.
+\begin{definition}[Alphabet]
+Un alfabeto $\Sigma$ è un insieme finito di simboli (caratteri).
+\end{definition}
+\begin{definition}[String]
+Una stringa $s$ è una sequenza di simboli da $\Sigma$
+\begin{itemize}
+\item $|s|$ denota la lunghezza di $s$
+\item $\epsilon$ denota la stringa vuota, cioè $|\epsilon| = 0$
+\item $\Sigma^*$ denota l'insieme di stringhe di $\Sigma$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Language]
+Un linguaggio $L$ su $\Sigma$ è un insieme di stringhe sull'alfabeto $\Sigma$.
+\end{definition}
+
+Perciò $L \subseteq \Sigma^* \text{ or } L \in 2^{\Sigma^*}$; dove $2^X$ è il
+\textbf{powerset} di $X$, l'insieme di tutte le sotto stringhe di $X$.
+
+\subsubsection{Operazioni sui linguaggi}
+\paragraph{Insiemistica}
+Essendo i linguaggi degli insieme ogni operazioni sugli insiemi sono definiti
+anche qui.
+\begin{itemize}
+\item Es. Unione: $L \cup M = \{s \mid s \in L \text{ or } s \in M\}$
+\end{itemize}
+\paragraph{Operazioni addizionali}
+\begin{itemize}
+\item Concatenazione: $LM = \{xy \mid x \in L \text{ and } y \in M\}$
+\item Esponenziale: $L^0 = \{\epsilon\}, \quad L^i = L^{i-1}L$
+\end{itemize}
+\paragraph{Chiusura}
+\begin{itemize}
+\item Kleene closure: $L^* = \bigcup_{i=0,\ldots,\infty}L^i$
+\item Positive closure: $L^+ = \bigcup_{i=1,\ldots,\infty}L^i$
+\end{itemize}
+
+\subsection{Espressioni regolari}
+\begin{definition}[Regular Expression]
+Dato un alfabeto $\Sigma$, un'espressione regolare su $\Sigma$ denota un
+linguaggio su $\Sigma$ e è definito come segue:
+
+Simboli base
+\begin{itemize}
+\item $\epsilon$, espressione regolare denotata dal linguaggio $\{\epsilon\}$
+\item $a$, espressione regolare denota $\{a\}$, $\forall a \in \Sigma$
+\end{itemize}
+
+Se $r$ e $s$ sono espressioni regolari denotando il linguaggio $L(r)$ e $L(s)$
+rispettivamente, allora
+\begin{itemize}
+\item $(r)|(s)$ è regexp per $L(r) \cup L(s)$
+\item $(r)(s)$ è regexp per $L(r)L(s)$
+\item $(r)^*$ è regexp per $L(r)^*$
+\item $(r)$ è regexp per $L(r)$
+\end{itemize}
+
+Un linguaggio definito da un'espressione regolare è chiamato Linguaggio Regolare.
+\end{definition}
+
+Due espressioni regolari sono \textbf{equivalenti} se denotano lo stesso
+linguaggio (es. $(a|b)^* = (a^*b^*)^*$).
+
+\subsection{Definizioni regolari}
+\label{sec:definizioni_regolari}
+\begin{definition}[Regular Definitions]
+Una definizione regolare ha la forma
+\begin{align*}
+d_1 &\to r_1 \\
+d_2 &\to r_2 \\
+& \dots       \\
+d_n &\to r_n
+\end{align*}
+dove ogni $r_i$ è un'espressione regolare su $\Sigma \cup
+\{d_1, \dots, d_{i-1}\}$
+\end{definition}
+
+Attraverso le definizioni si va a specificare il \textit{pattern} per il token.
+Dalla definizione regolare si va ad estrarre il \textit{transition diagram},
+garantendo che il più lungo lexema verrà identificato. Dal diagramma di
+transizione è semplice produrre il codice sorgente che lo esegue: loop con un
+multiway branch (\textit{switch/case}) basato sullo stato corrente. Ad ogni
+stato sono associate le istruzioni per determinare quale sarà quello successivo
+in base al carattere letto.
+
+\begin{lstlisting}[caption=Codice esempio diagramma di transizione, language=C]
+TOKEN getRelop()
+{
+  TOKEN retToken = new (RELOP);
+
+  // Il processo d'analisi dei caratteri continua
+  // finche' non si e' trovato un token oppure un
+  // errore e' stato accurato
+  while (1) {
+    case 0: c = nextChar();
+            if (c == '<') state = 1; // next state
+            else if (c == '=') state = 5;
+            else if (c == '>') state = 6;
+            // Il lexema non e' un relop
+            else fail();
+            break;
+    case 1: ...
+    ...
+    case 8: retract();
+            retToken.attribute = GT;
+            return retToken;
+  }
+}
+\end{lstlisting}
+
+Nel caso di pattern multipli, l'errore può essere derivato dal fatto di aver
+imboccato il sotto-diagramma errato e di conseguenza cercando il token errato.
+
+In caso perciò di fallimento bisogna determinare a quale stato ricominciare:
+
+\begin{lstlisting}[caption=Codice funzione \textit{fail}, language=C]
+int fail()
+{
+  forward = token_beginning;
+
+  switch (state) {
+    case 0: start = 9; break;
+    case 9: start = 12; break;
+    ...
+    case 25: recover(); break;
+    default: /* error */
+  }
+
+  return start;
+}
+\end{lstlisting}
+
+Una soluzione alternativa a controllare un singolo sotto-grafo alla volta è
+analizzarli in parallelo o unirli tutti insieme formando un diagramma
+\textbf{non deterministico} (due approcci quasi equivalenti).
+
+Un analizzatore lessicale non in grado di riconosce alcuni errori. Le strategie
+per eseguire \textit{Error Recovery} sono:
+\begin{itemize}
+\item Panic mode: caratteri ignorati finché non si raggiunge un token valido
+\item Rimozione di un carattere
+\item Inserimento carattere mancante
+\item Sostituzione carattere con un altro
+\item Trasposizione caratteri adiacenti
+\item Distanza di Levenshtein
+\end{itemize}
