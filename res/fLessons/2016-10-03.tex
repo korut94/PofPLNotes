@@ -1,0 +1,246 @@
+\section{Lezione 2016-10-03}
+\subsection{TODO}
+% Insert what you need. Any row is associated with the improvment or mistake
+% arise. In the first column you can insert what you should resolve or change,
+% instead in the second column you may put the section where to apply some
+% modification.
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|p{\textwidth}|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
+Chiedere specifiche perché realizzare un generatore di Lexical Analyzer
+& \ref{sec:lexer_generatore} \\ \hline
+Risolvere conflitti cosa intente? & \ref{sec:lexer_generatore} \\ \hline
+Comprendere il senso della risoluzione dei conflitti &
+\ref{sec:costruzione_thompson} \\ \hline
+Chiedere chiarimento su cosa siano \textit{Dstates} e \textit{Dtran} e cosa si
+intenda con \textit{unmarked state} nell'algoritmo di conversione NFA-DFA &
+\ref{sec:NFA_to_DFA} \\ \hline
+\end{tabular}
+\end{center}
+\caption{Tabella miglioramenti}
+\label{tab:tab_todo}
+\end{table}
+
+\subsection{Progettazione di un generatore di lexer}
+\label{sec:lexer_generatore}
+La progettazione di lexer che dato in input un linguaggio produce i token per il
+parse richiede una serie di passaggi:
+\begin{enumerate}
+\item Dalla RE (\textit{regular expression}) si costruisce un NFA
+(non-deterministic finite automaton) che accetta lo stesso linguaggio regolare
+\item Combinare gli NFA in uno singolo
+\item E' possibile \textbf{simulare direttamente} l'NFA o una volta determinato
+l'NFA simulare il DFA (deterministic finite automaton) risultante
+\item Risolvere conflitti
+\end{enumerate}
+
+\subsubsection{Non-deterministic Finite Automata}
+\begin{definition}[Non-deterministic Finite Automata - NFA]
+Un NFA è una 5-tupla $(S,\Sigma,\delta,s_0,F)$ dove:
+\begin{itemize}
+\item S è un insieme finito di stati
+\item $\Sigma$ è un insieme finito di simboli, l'alfabeto
+\item $\delta$ è una mappa da $S \times (\Sigma \cup \{\epsilon\})$ ad
+un'insieme di stati
+$$\delta : S \times (\Sigma \cup \{\epsilon\}) \to 2^S$$
+\item $s_0 \in S$ è lo stato di partenza
+\item $F \subseteq S$ è l'insieme degli stati accettanti (o finali)
+\end{itemize}
+\end{definition}
+
+La rappresentazione del NFA può avvenire mediante grafo di transizione,
+grafo orientato etichettato
+
+\begin{figure}[H]
+\includegraphics[scale=0.5]{res/image/nfa}
+\caption{Grafo di transizione per un \textit{NFA}}
+\label{img:nfa}
+\end{figure}
+
+L'immagine \ref{img:nfa} mostra l'NFA $N=(\{1,2,3,4\},\{a,b\},\delta,0,\{3\})$
+ed $\delta$ è possibile rappresentarlo mediante la seguente
+\textbf{tabella di transizione} (\textit{transition table}):
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+State & Input \textbf{a} & Input \textbf{b} \\ \hline
+0 & \{0,1\} & \{0\} \\ \hline
+1 & & \{2\} \\ \hline
+2 & & \{3\} \\ \hline
+\end{tabular}
+\end{center}
+\caption{Tabella di transizione}
+\label{tab:transition_table}
+\end{table}
+
+equivalente a:
+\begin{align*}
+\delta(0,\textbf{a}) &= \{0,1\} \\
+\delta(0,\textbf{b}) &= \{0\}   \\
+\delta(1,\textbf{b}) &= \{2\}   \\
+\delta(2,\textbf{b}) &= \{3\}
+\end{align*}
+
+\subsubsection{Linguaggio accettato da un NFA}
+\begin{definition}[Language defined by a NFA]
+Il linguaggio definito da un NFA $A$ è l'insieme di stringhe in input accettate,
+denotato $L(A)$.
+\end{definition}
+
+Le stringe (su $\Sigma$) accettate da un NFA sono tutte le stringhe $w$ in cui
+esiste un cammino del NFA con vertici etichettati con i simboli di $w$ in
+sequenza\footnote{le $\epsilon$-transizioni non contribuisco come simboli} dallo
+stato iniziale a qualche stato finale.
+
+La transizione da uno stato all'altro sul grafo di transizione è detto
+\textit{move}.
+
+\subsubsection{Costruzione di Thompson}
+\label{sec:costruzione_thompson}
+La \textit{Thompson's construction} prende una RE e costruisce tramite induzione
+strutturale un NFA che:
+\begin{itemize}
+\item \textbf{accetta esattamente lo stesso linguaggio dell'RE}
+\item ha un singolo stato d'accettazione
+\item nessuna transizione verso stato iniziale (no archi entranti)
+\item nessuna transizione dallo stato finale (no archi uscenti)
+\end{itemize}
+
+La complessità è \textbf{lineare} all'espressione regolare. Per le regole si
+veda
+\url{https://www.di.unipi.it/~andrea/Didattica/PLP-16/SLIDES/PLP-2016-06.pdf}
+slide \#10.
+
+Un sistema semplice per unire più grafi è mediante le $\epsilon$-transizioni.
+Si crea un nuovo spigolo come stato iniziale in cui partono tante
+$\epsilon$-transizioni \textbf{tanti quanti} sono i grafi da collegare.
+
+\subsection{RE a NFA a DFA}
+L'uso di un DFA per l'accettazione del linguaggio è molto più efficiente. Il
+problema è che se da RE a NFA la complessità era lineare la conversione da NFA
+a DFA può risultare esponenziale con il numero di stati dell'NFA.
+
+\subsubsection{Automa deterministico a stati finiti}
+Un DFA è un caso speciale di NFA dove:
+\begin{itemize}
+\item non vi sono $\epsilon$-transizioni
+\item $\forall s \in S \text{ e } a \in \Sigma \ \exists$ un vertice etichettato
+$a$ uscente da $s$
+\item ogni entry nella tabella di transizione è uno stato, esiste
+\textbf{al più} un percorso per accettare una stringa
+\end{itemize}
+
+\subsubsection{Conversione di un NFA a DFA}
+\label{sec:NFA_to_DFA}
+L'algortimo per la conversione dell'NFA al DFA è chiamato
+\textit{subset construction algorithm}, utilizzando due operatori:
+
+\paragraph{$\epsilon$-closure($s$)} = $\{s\} \cup \{t \mid s \to_\epsilon \dots
+\to_\epsilon t\}$
+\paragraph{$\epsilon$-closure($T$)} = $\bigcup_{s \in T}
+\epsilon\text{-closure}(s)$
+\paragraph{move($T,a$)} = $\{t \mid s \to_a \text{ e } s \in T\}$
+
+\bigskip
+
+producento:
+\begin{itemize}
+\item \textit{Dstate} insieme degli stati del nuovo DFA considerando gli stati
+dell'NFA
+\item \textit{Dtran} tabella di transizione del nuovo DFA
+\end{itemize}
+
+Attraverso il medesimo algoritmo è possibile \textbf{simulare un NFA}
+\begin{align*}
+& S := \epsilon\text{-closure}(\{s_0\})                        \\
+& S_{prev} := \emptyset                                        \\
+& a := nextchar()                                              \\
+& \mathbf{while} \ S \neq \emptyset \ \mathbf{do}              \\
+& \quad S_{prev} := S                                          \\
+& \quad S := \epsilon\text{-closure}(move(S,a))                \\
+& \quad a := nextchar()                                        \\
+& \mathbf{end \ do}                                            \\
+& \mathbf{if} \ S_{prev} \cap F \neq \emptyset \ \mathbf{then} \\
+& \quad \mathbf{execute} \ action \ in \ S_{prev}              \\
+& \quad \mathbf{return} \ ``yes''                              \\
+& \mathbf{else \ return} \ ``no''
+\end{align*}
+
+Il \textit{Subset Construction Algorithm} può essere cosi formulato:
+\begin{align*}
+& \mathbf{while} \ \text{there is a unmarked state} \ T \in Dstates      \\
+& \quad mark \ T                                                         \\
+& \quad \forall a \in \Sigma \ \mathbf{do}                               \\
+& \qquad U := \epsilon\text{-closure}(move(T,a))                         \\
+& \qquad \mathbf{if} \ U \notin Dstates \ \mathbf{then}                  \\
+& \qquad \quad \text{add} \ U \ \text{as an unmarked state to} \ Dstates \\
+& \qquad \mathbf{end \ if}                                               \\
+& \qquad Dtran[T,a] := U                                                 \\
+& \quad \mathbf{end \ do}                                                \\
+& \mathbf{end \ do}
+\end{align*}
+
+\subsubsection{Minimizzazione stati DFA}
+Una volta il DFA equivalente potrebbe essere possibile convertirlo in un altro
+DFA il quale accetta lo stesso linguaggio regolare con il minimo numero di
+stati. Ciò porterebbe benefici sia in termini di memoria che prestazioni.
+
+\begin{definition}[Equivalent states]
+Due stati $q$ e $q'$ in un DFA $M = (Q,\Sigma,\delta,q_0,F)$ sono equivalenti
+(o indistinguibili) se: $\forall w \in \Sigma^*$ gli stati sul quale
+$w$ termina, a partire da $q$ e $q'$, sono entrambi accetti o non-accetti.
+\end{definition}
+
+\begin{definition}[Irreducible automata]
+Un automata si dice irriducibile se:
+\begin{itemize}
+\item non contiene inutili (irragiungibili) stati
+\item non ci sono due stati distinti equivalenti
+\end{itemize}
+\end{definition}
+\bigskip
+L'algoritmo di minimizzazione (\textit{The Minimization Algorithm}) crea un
+automa irriducibile il cui accetta lo stesso linguaggio.
+
+Il processo di minimizzazione viene anche chiamato
+\textit{Partition-refinement}: parte con la partizione degli stati
+\{Accettanti, Non-accettanti\} e raffina fino alla conclusione.
+
+\begin{align*}
+& DFA \ \mathbf{minimize}(DFA(Q,\Sigma,d,q_0,F))                            \\
+& \quad Q := Q - unreachableStateFrom(q_0)                                  \\
+& \quad var \ P := \{F,Q-F\} \text{ // Partition }                          \\
+& \quad var \ Consistent := false                                           \\
+& \quad \mathbf{while} \ (Consisten = false)                                \\
+& \qquad Consistent := true                                                 \\
+& \qquad \forall \ (S \in P, a \in \Sigma, T \in P)                         \\
+& \qquad \quad \text{// collect state of T that reach S using a}            \\
+& \qquad \quad var \ temp := \{q \in T \mid d(q,a) \in S\}                  \\
+& \qquad \quad \mathbf{if} \ (temp \neq \emptyset \wedge temp \neq T)       \\
+& \qquad \qquad Consistent := false                                         \\
+& \qquad \qquad P := (P \setminus {T}) \cup \{temp,T-temp\}                 \\
+& \quad \mathbf{return} \ defineMinimizor((Q,\Sigma,d,q_0,F),P)
+\end{align*}
+
+\begin{align*}
+& DFA \ \mathbf{defineMinimizor(DFA(Q,\Sigma,\delta,q_0,F), P)}             \\
+& \quad var \ Q' := P                                                       \\
+& \quad \text{// The set with } q_0 \text{. This is unique!}                \\
+& \quad var \ q'_0 := \{C \in P \mid C \cap \{q_0\} \neq \emptyset\}        \\
+& \quad var \ F' := \{S \in P \mid S \subseteq F\}                          \\
+& \quad \forall \ (S \in P, a \in \Sigma)                                   \\
+& \qquad var \ \delta'(S,a):=\{T\in P\mid\delta(s,a)\in T\ \forall s\in S\} \\
+& \quad \mathbf{return} \ (Q',\Sigma,\delta',q'_0,F')
+\end{align*}
+
+Questo algoritmo oltre a garantire di produrre un grafo \textbf{irriducibile} è
+anche il più piccolo possibile, dato il teorema seguente:
+
+\begin{theorem}[THM - Myhill-Nerode]
+The Minimization Algorithm produce il più piccolo automa per il suo
+linguaggio accettato.
+\end{theorem}
