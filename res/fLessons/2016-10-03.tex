@@ -4,7 +4,7 @@
 % arise. In the first column you can insert what you should resolve or change,
 % instead in the second column you may put the section where to apply some
 % modification.
-\begin{table}[ht]
+\begin{table}[H]
 \begin{center}
 \begin{tabular}{|p{\textwidth}|c|}
 \hline
@@ -139,11 +139,11 @@ $a$ uscente da $s$
 L'algortimo per la conversione dell'NFA al DFA è chiamato
 \textit{subset construction algorithm}, utilizzando due operatori:
 
-\paragraph{$\epsilon$-closure($s$)} = $\{s\} \cup \{t \mid s \to_\epsilon \dots
+\paragraph{$\epsilon$-closure($s$)} = $\{s\} \cup \{t \mid s \to_\epsilon ...
 \to_\epsilon t\}$
 \paragraph{$\epsilon$-closure($T$)} = $\bigcup_{s \in T}
 \epsilon\text{-closure}(s)$
-\paragraph{move($T,a$)} = $\{t \mid s \to_a \text{ e } s \in T\}$
+\paragraph{move($T,a$)} = $\{t \mid s \to_a t \text{ e } s \in T\}$
 
 \bigskip
 
@@ -218,7 +218,7 @@ Il processo di minimizzazione viene anche chiamato
 & \quad \mathbf{while} \ (Consisten = false)                                \\
 & \qquad Consistent := true                                                 \\
 & \qquad \forall \ (S \in P, a \in \Sigma, T \in P)                         \\
-& \qquad \quad \text{// collect state of T that reach S using a}            \\
+& \qquad \quad \text{// collect state of 'T' that reach 'S' using 'a'}      \\
 & \qquad \quad var \ temp := \{q \in T \mid d(q,a) \in S\}                  \\
 & \qquad \quad \mathbf{if} \ (temp \neq \emptyset \wedge temp \neq T)       \\
 & \qquad \qquad Consistent := false                                         \\
