@@ -38,8 +38,8 @@ Il \textit{code generator} ha tre compiti primari:
 \item ordinamento delle istruzioni
 \end{itemize}
 
-Inoltre il compilatore pu\`o includere una fase di ottimizzazione (mappamento
-dell'IR in input con IR ottimizzato) prima della generazione del codice.
+Inoltre il compilatore pu\`o includere una fase di ottimizzazione (mappa l'IR
+in input con IR ottimizzato) prima della generazione del codice.
 
 \subsection{Variabili del generatore}
 \subsubsection{L'input}
@@ -76,3 +76,12 @@ Le macchine si vanno a dividire in due principali categorie:
 \paragraph{Stack-based}
 gli operandi sono inseriti nello stack e le operazioni sono eseguite nel top
 (trattenute nei registri). In generale meno efficiente.
+
+\subsection{Selezione dell'istruzione}
+Uno comando pu\`o essere tradotto in vari modi. La scelta su quale set di
+istruzioni convertirlo dipende:
+\begin{enumerate}
+\item livello dell'IR
+\item set d'istruzioni dell'architettura
+\item la qualit\`a desiderata (es. efficienza) del codice generato
+\end{enumerate}
