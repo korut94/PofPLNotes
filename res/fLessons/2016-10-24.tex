@@ -1,4 +1,4 @@
-\section{Lezione \_DATA\_}
+\section{Lezione 2016-10-24}
 \subsection{TODO}
 % Insert what you need. Any row is associated with the improvment or mistake
 % arise. In the first column you can insert what you should resolve or change,
@@ -15,4 +15,64 @@
 \label{tab:tab_todo}
 \end{table}
 
-\subsection{subsection name}
+\subsection{Sul generatore di codice}
+Il codice prodotto dal compilatore deve essere corretto, ovvero, deve
+preservare la semantica (\textit{semantic preserving}) e dovrebbe essere di
+alta qualit\'a. Ci\`o implica un uso efficacie delle risorse della macchina
+obiettivo ed, attraverso una serie di euristiche, produrre un buon codice
+vicono a quello ottimale (la produzione di codice ottimale \`e
+\textbf{indicibile}).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.4]{res/image/code_generator_position}
+  \caption{Posizione del generatori di codice}
+  \label{img:code_generator_position}
+\end{figure}
+
+\subsection{Compiti del generatore}
+Il \textit{code generator} ha tre compiti primari:
+\begin{itemize}
+\item selezione dell'istruzione
+\item assegnazione ed allocazione dei registri
+\item ordinamento delle istruzioni
+\end{itemize}
+
+Inoltre il compilatore pu\`o includere una fase di ottimizzazione (mappamento
+dell'IR in input con IR ottimizzato) prima della generazione del codice.
+
+\subsection{Variabili del generatore}
+\subsubsection{L'input}
+L'input del generatore \`e l'IR del codice sorgente, con i puntatori alle
+informazioni salvate nella tabella dei simboli.
+\subsubsection{Codice target}
+Il \textit{backend} di un generatore di codice pu\`o generare differenze forme
+di codice a seconda dei requisiti:
+\begin{itemize}
+\item codice macchina assoluto (codice eseguibile)
+\item codice macchina riallocabile (file oggetto per il \textbf{linker})
+\item linguaggio assembly (facilita il debuggin, ma richiede un assembly step)
+\end{itemize}
+
+\subsubsection{Architettura della macchina}
+Definisce il set d'istruzioni avviabili, incluso il modello d'indirizzamento:
+alto impatto sul codice generato.
+
+Le macchine si vanno a dividire in due principali categorie:
+\paragraph{CISC}
+\begin{itemize}
+\item istruzioni multi-clock
+\item metodo d'indirizzamento complesso
+\item serie di classi di registri
+\item lunghezza variabile delle istruzioni in memoria
+\end{itemize}
+\paragraph{RISC}
+\begin{itemize}
+\item istruzioni single-clcok
+\item molti registri
+\item istruzioni a tre indirizzi
+\item metodo d'indirizzamento semplice
+\end{itemize}
+\paragraph{Stack-based}
+gli operandi sono inseriti nello stack e le operazioni sono eseguite nel top
+(trattenute nei registri). In generale meno efficiente.
