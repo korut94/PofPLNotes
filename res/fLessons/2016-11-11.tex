@@ -1,4 +1,4 @@
-\section{Lezione 2016-11-07}
+\section{Lezione 2016-11-11}
 \subsection{TODO}
 % Insert what you need. Any row is associated with the improvment or mistake
 % arise. In the first column you can insert what you should resolve or change,
@@ -15,4 +15,47 @@
 \label{tab:tab_todo}
 \end{table}
 
-\subsection{Simple Code generator}
+\subsection{Liveness/Next-Use}
+Trought a graph we can keep track of the variable's life. Instead keep the
+information in a single block (scope), we can find the life for the whole
+program. Also, we keep the local life information into the nodes.
+
+\subsection{Dataflow analysis}
+Many static analyses are dataflow analysis:
+\begin{itemize}
+\item Livenss
+\end{itemize}
+
+Step:
+\begin{enumerate}
+\item Determine the leaders: fist statement, each targer of the goto. So there
+are the first istruction of the block and the immediatly next
+\item Take the block and plug each leaders
+\end{enumerate}
+
+How many registers do I need to compile this program?
+we considere $v$ live at a point of the program so there is a path from $v$
+an another program $p$ where $v$ is used.
+
+In this way we can calculate when a variable alive. In the control flow graph
+attach in the edges the set of alive variables.
+
+\subsection{Determining Live Sets}
+The approch of the data flow analysis:
+\begin{itemize}
+\item consider the origin of information, where liveness holds because of immediate
+observation
+\item the propagation of informazion
+\item joining information: how liveness info is passed acrosss the boundaries
+of the block
+\end{itemize}
+
+\subsubsection{Orign information}
+If a variable is used at a program point p, then it must be alvie immediately
+before p.
+
+If the variable is not used before p, we must see the propagatation:
+\begin{enumerate}
+\item it is alive immediate after p
+\item it is not refefined at p
+\end{enumerate}
