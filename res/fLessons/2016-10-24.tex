@@ -79,9 +79,25 @@ gli operandi sono inseriti nello stack e le operazioni sono eseguite nel top
 
 \subsection{Selezione dell'istruzione}
 Uno comando pu\`o essere tradotto in vari modi. La scelta su quale set di
-istruzioni convertirlo dipende:
+istruzioni convertirlo dipende da:
 \begin{enumerate}
 \item livello dell'IR
 \item set d'istruzioni dell'architettura
 \item la qualit\`a desiderata (es. efficienza) del codice generato
 \end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{res/image/choice_cost}
+  \caption{Scelta del set di comandi in base al costo}
+  \label{img:choice_cost}
+\end{figure}
+
+Per semplicit\`a dell'architettura possiamo definire il costo come
+\begin{align*}
+cost(\mathbf{OP \ dst}, \mathbf{src1}, \mathbf{src2})
+&= 1 \\
+&+ cost(dst\text{-}mode) \\
+&+ cost(src1\text{-}mode) \\
+&+ cost(src2\text{-}mode)
+\end{align*}
