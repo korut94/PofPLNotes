@@ -59,3 +59,55 @@ If the variable is not used before p, we must see the propagatation:
 \item it is alive immediate after p
 \item it is not refefined at p
 \end{enumerate}
+
+Le espressioni very busy si intendo quando viene calcolata in ogni path da un
+certo punto del programma fino alla sua terminazione.
+
+La propagazione e' very bysu se e' immediatamente very busy prima di p e le
+variabili
+
+\subsection{Reaching definitions}
+La reaching definition e' molto utile per varie tecninche di ottimizzazione in
+combinazione con altre tecniche.
+
+Un'assegnazione e' morta perche' la definizione della variabile non raggiunge
+nessun uso di quella variabile. Noi abbiamo definito una variabile ma non viene
+piu' usata.
+
+\subsubsection{Information origin}
+Se un programma da un punto p defini una variabile v allora v e' ustata
+immediatamente dopo p.
+\subsubsection{Propagation}
+v raggiunge p sse:
+\begin{enumerate}
+\item la definition raggiunghte il punto immediatamente prima di p.
+\item la v non e' ridefinita a p
+\end{enumerate}
+\subsubsection{joinin}
+v raggiiunge immediatamente dopo almeno un predecessore di p se lui raggiunge
+il punto immediatamente prima di p.
+\subsubsection{IN - OUT}
+IN = isieme di deinition che raggiunge il punto imediatamente prima di p
+OUT = insieme di definition che faggiunto il punto immediamente dopo p.
+\subsubsection{Equation}
+\begin{align*}
+  IN(p) &= \bigcup OUT(p_s),p_s \in pred(p) \\
+  OUT(p) &= (IN(p) \over \{defs(v))\} \cup \{p\}
+\end{align*}
+
+\subsection{Transfer functions}
+Le liveness e very busy expression sono \textbf{backward} dataf low analysis
+perche' guardano l'operazione precedente
+$$IN[s] = f_s(OUT[s])$$
+le altre due sono \textbf{forward} data flow analysis
+$$OUT[s] = f_s(IN[s])$$
+
+Le transfer functions sono quelle sono il simbolo d'unione e l'intersezione.
+
+La mergin function definisce il comportamente della collisione di piu' punti.
+
+
+
+\subsection{Nota generale}
+Per ogni definizione basta guardare: l'origine dell'informazione, propagazione
+e la join. Da li si calcola l'IN e l'OUT per fare data-flow analysis.
