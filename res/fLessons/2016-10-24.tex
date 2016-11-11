@@ -101,3 +101,39 @@ cost(\mathbf{OP \ dst}, \mathbf{src1}, \mathbf{src2})
 &+ cost(src1\text{-}mode) \\
 &+ cost(src2\text{-}mode)
 \end{align*}
+
+La mappatura semplice delle singole istruzioni non garantisce una buona
+qualit\`a del codice, in quanto non si va ad osservarlo nella usa interezza.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{res/image/needed_global_optimization}
+  \caption{Necessarie ottimizzazione globali per eliminare ridondanze}
+  \label{img:needed_global_optimization}
+\end{figure}
+
+Si possono fare due accorgimenti per garantire una buona qualit\`a del codice:
+\paragraph{Allocazione ed assegnazione dei registri}
+L'uso efficiente di un piccolo insieme di registri \`e importante per generare
+buon codice. I registri sono assegnati per:
+\begin{itemize}
+\item \textit{Register Allocation} - per selezionare l'insieme delle variabili
+che risiederanno nei registri a quel punto del codice
+\item \textit{Register Assignment} - per scegliere in quale registro la
+variabile risiedera
+\end{itemize}
+Trovare un insieme di registri ottimali \`e un problema in
+\textit{NP-completo}.
+\paragraph{Scelta dell'ordine di istruzioni}
+L'ordine delle istruzioni potrebbe portare ad un miglioramento delle
+prestazioni del programma. Se le istruzioni sono indipendenti, l'ordine di
+valutazione pu\'o cambiare.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{res/image/reorder_variable}
+  \caption{Riordinamento di variabili indipendenti}
+  \label{img:reorder_variable}
+\end{figure}
+
+\subsection{Towards Flow Graphs}
