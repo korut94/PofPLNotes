@@ -1,4 +1,4 @@
-\section{Lezione 2016-11-21}
+\section{Lezione 2016-10-21}
 \subsection{TODO}
 % Insert what you need. Any row is associated with the improvment or mistake
 % arise. In the first column you can insert what you should resolve or change,
@@ -261,19 +261,54 @@ grammatica.
 L'idea del \textit{bankpatching} \`e produrre tutto il
 \textit{three-address code} comprese le guardie ma non trascrivere le etichette
 dei vari branch condizionali, il quale saranno calcolate in un secondo tempo.
-Al momento della creazione dei corpi si invia la richiesta di inserire la
-posizione all'interno della lista $.truelist$ se \`e il branch quando la
-condizione ha successo oppure $.falselist$ se non lo \`e.
+Nel parsing della grammatica si riscontrano due momenti decisivi:
+\paragraph{Guardia}
+All'incontro della guarda si richiedono i propri indirizzi di memoria nel
+quale verranno salvate in due list: \textit{.truelist} e \textit{.falselist}.
+Nella \textit{.truelist} si inserisce l'indirizzo della stessa guardia e nella
+\textit{.falselist} l'indirizzo dell'istruzione immediatamente successiva
+(il salto al corpo del branch quando la guardia \`e falsa). Infine si stampano
+i controlli di flusso lasciando dei segnaposti sulle label.
 
-Nel caso specifico si vanno ad aggiungere tre funzioni:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{res/image/condition_backpatching}
+  \caption{\textit{Semantic Rules} per la guardia}
+  \label{img:condition_backpatching}
+\end{figure}
+
+Attraverso comandi \textit{makelist} e \textit{nextquad} si va a uscire dalla
+semplice denotazione semantica ma ad avviare proprie procedure per garantire
+la rimozione degli attributi ereditati:
 \begin{itemize}
-\item $makelist(i)$ - crea una lista contenente il \textit{three-address
-location} di $i$ e ritorna il puntatore alla lista
-\item $merge(p_1,p_2)$ - concatena le due liste puntate da $p_1$ e $p_2$ e
-ritorna la lista risultato
-\item $backpatching(p,i)$ - inserisce $i$ come etichetta target per ogni
-comando nella lista puntata da $p$
+\item \textit{makelist} costruisce la lista in cui verranno messi tutti i
+\textit{three-address code} relativi alle istruzioni di salto con i segnaposto
+usati per rappresentare l'indirizzo di destinazione, e ritorna il puntato ad
+essa.
+\item \textit{nextquad} ritorna l'indirizzo di memoria occupato dall'istruzione
+corrente. Nota: \textit{nextquad} \`e un indirizzo di memoria a tutti gli
+effetti ed \`e quindi possibile utilizzare l'aritmetica dei puntatori.
 \end{itemize}
 
-Attraverso questi comandi, implementati in un linguaggio di programmazione
-(es. C/C++), si riesce ad implementare la tecnica del \textit{backpatching}.
+\paragraph{Blocchi condizionali}
+Nelle produzioni della grammatica si pu\'o beneficiare di una vista ad alto
+livello della sintassi, in questo caso dei blocchi che compongono il programma.
+Nella produzione si modella l'inizio e la fine dei blocchi e questo permette di
+agire per sapere quando eseguire le operazioni di \textit{backpatching}.
+
+La grammatica viene aumentata con l'inserimento di un
+\textit{marker nonterminal} esattamente nel punto in cui il blocco finisce e
+comincia quello successivo. Al suo sviluppo verr\'a richiesto la posizione di
+memoria della prima istruzione del blocco in cui risiede che \`e esattamente
+l'indirizzo di memoria della prima istruzione del blocco successivo.
+
+Ora, a seconda dell'operazione, il \textit{backpatching} agir\'a su una delle
+due liste: (\textit{.truelist} e \textit{.falselist}), sostituendo i segnaposto
+con l'indirizzo acquisito nello sviluppo del \textit{marker}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{res/image/block_backpatching}
+  \caption{\textit{Semantic Rules} per i blocchi}
+  \label{img:block_backpatching}
+\end{figure}
