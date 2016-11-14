@@ -9,6 +9,7 @@ addons:
   apt:
     packages:
     - texlive-latex-extra
+    - texlive-science
     - texlive-luatex
     - cm-super
     - texlive-bibtex-extra
