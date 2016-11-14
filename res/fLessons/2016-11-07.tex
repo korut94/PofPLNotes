@@ -1,4 +1,4 @@
-\section{Lezione \_DATA\_}
+\section{Lezione 2016-11-07}
 \subsection{TODO}
 % Insert what you need. Any row is associated with the improvment or mistake
 % arise. In the first column you can insert what you should resolve or change,
@@ -15,4 +15,102 @@
 \label{tab:tab_todo}
 \end{table}
 
-\subsection{subsection name}
+\subsection{Generatore di codice}
+\begin{definition}[Code generator]
+Un generatore di codice \`e un algoritmo per generare codice target per un
+blocco base (sequenze di istruzioni \textit{three-address code}) usando la
+\textit{next-use information} (locale).
+\end{definition}
+
+Il problema maggiore \`e l'utilizzo dei \textbf{registri}. Vi sono varie
+tecniche affinch\`e i registri vengano sfruttati con efficenza.
+
+\subsubsection{Next-Use Information (locale)}
+La \textit{next-use information} \`e necessaria l'\textbf{eliminatione} del
+codice morto e l'\textbf{assegnazione} dei registri. La \textit{next-use} \`e
+calcolata mediante scansione all'indietro (\textit{backward}) di un blocco base
+ed esegue le seguenti azioni su istruzioni $L: \ x := y \ op \ z$:
+\begin{enumerate}
+\item Aggiunge un' informazione \textit{next-use/viva} su $x,y$ e $z$
+all'istruzione $L$ (informazione archiviata nella tabella dei simboli)
+\item Salendo alle istruzioni precedenti (\textit{scan up}):
+\begin{itemize}
+\item informazioni di $x$: \textit{not live} e \textit{no next use}
+\item informazioni di $y,z$: \textit{live} e \textit{next use}$\ =L$
+\end{itemize}
+\end{enumerate}
+
+Al primo passo, l'ultima istruzione, tutte le variabile sono \textbf{vive}
+senza nessun uso successivo (etichetta istruzione dove verr\'a riutilizzata).
+Queste informazioni vengono assegnare all'ultima informazione di cui in seguito
+si calcola la sua \textit{next-use information}, come in
+fig.\ref{img:next-use}. L'informazione calcola sar\'a attaccata all'istruzione
+precedente. Il processo continua fich\`e ogni informazione ha il suo
+\textit{next-use information} (fig.\ref{img:second_step_next-use}).
+
+\begin{figure}[H]
+\includegraphics[scale=0.4]{res/image/next-use}
+\caption{Primo passaggio per calcolo del \textit{next-use}}
+\label{img:next-use}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[scale=0.4]{res/image/second_step_next-use}
+\caption{Passaggio successivo per calcolo del \textit{next-use}}
+\label{img:second_step_next-use}
+\end{figure}
+
+\subsection{Abbozza del generatore}
+Per ogni istruzione \textit{three-address code} l'algoritmo esegue le
+operazioni in modo da conseguire i comandi avendo tutte le risorse (operandi)
+nei registri:
+\begin{enumerate}
+\item Controllo assenza operandi nei registri, invio \textbf{loads}
+corrispondente
+\item invio operazioni
+\item invio \textbf{store} del risultato, se necessario
+\end{enumerate}
+
+L'algoritmo fa uso dell'\textit{address descriptors}, del
+\textit{register descriptors} ed una funzione $getReg$ il quale
+$getReg=(x=y \ OP \ z)$ ritorna i tre registri da utilizzare per $x,y,z$
+(denotati come \textit{Rx,Ry} e \textit{Rz}).
+
+\subsubsection{Descrittore indirizzi e registri}
+I descrittori servono per mantenere la posizione delle risorse
+(indirizzi, variabili) necessarie all'esecuzione del programma.
+
+\paragraph{Register descriptor (RD)}
+tiene traccia delle variabili di cui il valore corrente nel registro.
+\paragraph{Address descriptor (AD)}
+tiene traccia del luogo dove il valore corrente della variabile potr\`a
+essere trovato.
+
+L'RD lavora per ogni registro disponibile, invece l'AD per ogni variabile.
+
+Con \textbf{luogo} si pu\'o intendere un registro ma anche posizioni nello
+stack, indirizzi di memoria e cosi via. Quest'informazione potr\'a essere
+salvata nella tabella dei simboli.
+
+\subsubsection{Algoritmo del generatore}
+\paragraph{Per istruzioni \textit{three-address code} ($x = y \ OP \ z$)}
+\begin{itemize}
+\item usa $getReg=(x=y \ OP \ z)$ per selezionare i registri \textit{Rx,Ry} e
+\textit{Rz} per $x,y,z$.
+\item se $y$ non \`e in \textit{Ry}, si invia un'istruzione \textit{LD Ry,$y'$}
+dove $y' \in AD(y)$, preferibilmente un registro
+\item similarmente per $z$
+\item invia l'istruzione \textit{OP Rx,Ry,Rz}
+\end{itemize}
+
+\paragraph{Istruzioni di copia ($x=y$)}
+\begin{itemize}
+\item se $y$ non \`e gi\'a nel registro, invia \textit{LD Ry,$y'$}
+\item regola $RD$ per \textit{Ry} cosi da includere $x$
+\item cambia $AD$ per $x$ cosi la sua unica posizione \`e in \textit{Ry}
+\end{itemize}
+
+\paragraph{Fine del blocco base}
+\begin{itemize}
+\item se $x$ \`e usato in altri blocchi, invia \textit{ST x,Rx}
+\end{itemize}
