@@ -9,6 +9,8 @@
 \begin{tabular}{|p{\textwidth}|c|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Miglioramento}} & \textbf{Sezione} \\ \hline
+Chiarire la dicitura \textbf{OK} nell'algoritmo $getReg$ &
+\ref{alg:gerReg} \\ \hline
 \end{tabular}
 \end{center}
 \caption{Tabella miglioramenti}
@@ -114,3 +116,109 @@ dove $y' \in AD(y)$, preferibilmente un registro
 \begin{itemize}
 \item se $x$ \`e usato in altri blocchi, invia \textit{ST x,Rx}
 \end{itemize}
+
+\begin{algorithm}[H]
+\caption{$getReg=(x:=y \ OP \ z)$}
+\label{alg:gerReg}
+\begin{algorithmic}
+\Function {getRegisterFor}{$a$}
+\If {$a.isStored()$}
+  \Return {$a.register()$}
+\ElsIf {$isREmpty()$}
+  \Return {$REmpty()$} \Comment registro come $Ra$
+\Else
+  \State declare $R_{min}$ \Comment R con il minimo di spill
+  \State $R_{min}.spill \leftarrow \infty$
+  \ForAll {$R \in getRegisters()$}
+    \State $R.spill \leftarrow 0$
+    \ForAll {$v \in RD(R)$}
+      \If {$AD(v)-\{R\} \neq \emptyset$}
+        break
+      \ElsIf {$v=x$ \&\& !$live(x)$}
+        break
+      \ElsIf {$nextUse(v) \neq nextIstruction()$}
+        break
+      \Else
+        \State $print(\mathbf{ST \ v,R})$
+        \State $R.spill \leftarrow R.spill + 1$
+      \EndIf
+    \EndFor
+    \State $R_{min} \leftarrow \underset{spill}{min}(R_{min},R)$
+  \EndFor
+  \State \Return $R_{min}$
+\EndIf
+\EndFunction
+\\
+\Function {getRegisterForX} {$Ry,Rz$}
+\If {$noMoreUsed(y) \ \&\& \ RD(Ry)=\{y\}$}
+  \State \Return $Ry$
+\ElsIf {$noMoreUsed(z) \  \&\& \ RD(Rz)=\{z\}$}
+  \State \Return $Rz$
+\Else
+  \State \Return $getRegisterFor(x)$
+\EndIf
+\EndFunction
+\\
+\State declare $Ry \leftarrow getRegisterFor(y)$
+\State declare $Rz \leftarrow getRegisterFor(z)$
+\State declare $Rx \leftarrow getRegisterForX(Ry,Rz)$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{$getReg(x:=y)$}
+\label{alg:getRegEq}
+\begin{algorithmic}
+\State declare $Ry \leftarrow getRegisterFor(y)$
+\State declare $Rx \leftarrow Ry$
+\end{algorithmic}
+\end{algorithm}
+
+Il generatore basato sull'algoritmo $getReg$ non \`e ottimale; tutte le
+variabili vive nei registri sono archiviate alla fine di un blocco:
+\textbf{questo potrebbe non essere necessario}.
+
+Il \textbf{registro globale di allocazione} assegna le variabili ad un numero
+limitato di registri e attende di tenere questi registri consistenti tra i
+confini dei blocchi base.
+
+Gruppi di registri possono essere dedicati a certi valori (indirizzi base,
+aritmetici, puntatori allo stack). Ci\'o semplifica il generatore ma di contro
+vi \`e un uso meno efficiente dei registri.
+
+\subsubsection{Allocazione registri nel loop}
+Supponiamo i seguenti benefici:
+\begin{itemize}
+\item non immagazzianare una variabile $x$ ha un beneficio di 2
+\item accedere alla variabile invece che alla memoria ha un beneficio di 1
+\end{itemize}
+
+inoltre dichiriamo:
+\begin{itemize}
+\item $use(x,B)=$ numero di uso $x$ in $B$ prima dell'assegnamento
+\item $live(x,B)=1$ se $x$ \`e assegnata in $B$ e vive all'uscita da $B$
+\end{itemize}
+
+\begin{definition}[Benefit]
+Il beneficio (approssimato) d'allocazione di una variabile $x$ in un registro
+all'interno di un loop $L$ \`e
+$$\sum_{B \in L}(use(x,B)+2live(x,B))$$
+\end{definition}
+
+\subsection{Allocazione dei registri globali con il grafo dei colori}
+Quando un registro \`e necessario ma tutti i registri avviabili sono in uso,
+il contenuto di uno dei registri usati deve essere archiviato
+(\textit{spilled}) per liberare il registro.
+
+Attraverso un grafo dei colori si va ad allocare i registri e tenta di
+minimizzare il costo degli \textit{spill}. Primo bisogna costruire il grafo dei
+\textbf{conflitti} (o grafo d'interferenza): abbiamo un nodo per ogni variabile
+viva e due variabili hanno un vertice se una \`e viva dove l'altra \`e
+definita. Infine bisogna trovare il grafo a k-colori dove i colori sono i
+registri.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.4]{res/image/interference_graph}
+  \caption{Costruzione grafo d'interferenza}
+  \label{img:interference_graph}
+\end{figure}
